@@ -1,0 +1,28 @@
+{
+  "author": "",
+  "description": "JS13K 2025",
+  "dependencies": {
+    "@types/pg": "^8.15.5",
+    "okay-site-login": "^0.0.14",
+    "pg": "^8.16.3",
+    "rokay": "^0.0.38",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.2"
+  },
+  "license": "ISC",
+  "main": "_dist/server/kiki.js",
+  "name": "kiki",
+  "rokay": {
+    "port": 4141,
+    "theme": "#000",
+    "title": "Kiki",
+    "version": 5
+  },
+  "scripts": {
+    "build": "rokay build",
+    "start": "rokay server:run",
+    "watch": "rokay watch"
+  },
+  "type": "module",
+  "version": "1.0.0"
+}

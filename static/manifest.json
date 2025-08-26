@@ -1,0 +1,17 @@
+{
+  "background_color": "#000",
+  "description": "JS13K 2025",
+  "icons": [],
+  "lang": "en-US",
+  "name": "Kiki",
+  "orientation": "any",
+  "related_applications": [
+    {
+      "platform": "web"
+    }
+  ],
+  "scope": "/",
+  "short_name": "Kiki",
+  "start_url": ".",
+  "theme_color": "#000"
+}
