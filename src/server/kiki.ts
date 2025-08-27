@@ -10,40 +10,57 @@ import { getDirname } from "rokay/server/node"
 import { APIs } from "./apis.gen.js"
 import { AppServer } from "./app.js"
 import { Base } from "./base.gen.js"
+import { BlogService } from "./blogs/service.js"
 import { KikiConfig } from "./config.js"
 import { KikiDB } from "./db.js"
 import { HTML } from "./html.js"
 
-const { Pool } = pg
 
-const __dirname = getDirname(import.meta)
+const
+  { Pool } = pg
+
+const
+  __dirname = getDirname(import.meta)
 
 
 export const
   Kiki = (config: KikiConfig) => {
-    getAndMigrateKikiDB().then(({ kikiDB: _kikiDB, loginDB }) => {
-      UserServer("Kiki", config.server, { loginDB }, ({ users }) => ({
-        apis: [
-          APIs(
-            {
-              HTML: (elt, req, res) =>
-                users.current(req, res).then((user) => {
-                  const app = AppServer(req, user)
-                  return HTML(app, Base(app, elt))
-                }),
-            },
-            {},
-          ),
-        ],
-        notFound: (req, res) =>
-          users.current(req, res).then((user) => {
-            const app = AppServer(req, user)
-            return HTML(app, Base(app))
-          }),
-      }))
-    }, error => {
-      console.error("Error Running Migrations:", error)
-    })
+    getAndMigrateKikiDB().then(
+      ({ kikiDB: _kikiDB, loginDB }) => {
+        const blogs = BlogService(resolve(
+          getDirname(import.meta),
+          "..",
+          "..",
+          "src",
+          "shared",
+          "blogs",
+          "entries",
+        ))
+        UserServer("Kiki", config.server, { loginDB }, ({ users }) => ({
+          apis: [
+            APIs(
+              {
+                blogs,
+                HTML: (elt, req, res) =>
+                  users.current(req, res).then((user) => {
+                    const app = AppServer(req, user)
+                    return HTML(app, Base(app, elt))
+                  }),
+              },
+              {},
+            ),
+          ],
+          notFound: (req, res) =>
+            users.current(req, res).then((user) => {
+              const app = AppServer(req, user)
+              return HTML(app, Base(app))
+            }),
+        }))
+      },
+      (error) => {
+        console.error("Error Running Migrations:", error)
+      },
+    )
   }
 
 
@@ -53,25 +70,21 @@ const
       project = "kiki",
       pool = new Pool(),
       db = DBPG(pool),
-      Migrations = db.table<{
-        created: Date
-        file: string
-        project: string
-      }>("migrations")
+      Migrations = db.table<
+        {
+          created: Date
+          file: string
+          project: string
+        }
+      >("migrations")
 
     return migrate(
       resolve(__dirname, "..", "..", "schema"),
       db.transact,
-      conn =>
-        conn.q(Migrations.select(["file"], {
-          where: Eq("project", project)
-        }))
-          .then(rows => rows.map(r => r.file)),
-      (conn, file) =>
-        conn.e(Migrations.insert([{ file, project }])),
+      (conn) =>
+        conn.q(Migrations.select(["file"], { where: Eq("project", project) }))
+          .then((rows) => rows.map((r) => r.file)),
+      (conn, file) => conn.e(Migrations.insert([{ file, project }])),
     )
-      .then(() => ({
-        kikiDB: KikiDB(db),
-        loginDB: LoginDB(db),
-      }))
+      .then(() => ({ kikiDB: KikiDB(db), loginDB: LoginDB(db) }))
   }
