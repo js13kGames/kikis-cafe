@@ -9,6 +9,11 @@ body {
   color: #fff;
 }
 
+canvas, img {
+  display: block;
+  image-rendering: pixelated;
+}
+
 h1, h2, p {
   margin: 1em 0 .5em;
 }

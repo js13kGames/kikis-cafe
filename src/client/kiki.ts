@@ -3,6 +3,12 @@ import { apd } from "rokay/browser/core"
 import { code, h2 } from "rokay/browser/elt"
 import { mount } from "rokay/browser/mount"
 import { BrowserRouter } from "rokay/browser/router"
+import { WindowSize } from "rokay/browser/window"
+import { divide, floor_ } from "rokay/math/v"
+import { derive } from "rokay/prop/derive"
+
+import { Cat } from "../shared/cats/types.gen.js"
+import { World } from "../shared/world/types.gen.js"
 
 import { AppClient } from "./app.js"
 import { Base } from "./base.syn.js"
@@ -12,9 +18,21 @@ import { IndexPages } from "./pages.gen.js"
 mount(document.body, () => {
   const
     router = BrowserRouter(),
-    app: AppClient = { router, user: getUserAsink() }
+    app: AppClient = {
+      router,
+      user: getUserAsink(),
+      size: derive(WindowSize(), (windowSize) => {
+        const zoom = 4
+        return {
+          size: floor_(divide(windowSize, zoom)),
+          windowSize,
+          zoom,
+        }
+      }),
+    },
+    world = World([Cat("#000", "#ff0")])
 
-  return Base(app, router.match([...IndexPages({})], (path) => h2(
+  return Base(app, router.match([...IndexPages({ appClient: app, world })], (path) => h2(
     apd("Page ", code(apd(path)), " Not Found"),
   )))
 })
