@@ -10,3 +10,4 @@ static/*.js
 static/*.map
 .env
 *.gen.ts
+build.zip

@@ -1,5 +1,5 @@
 {
-  "author": "",
+  "author": "Daniel Bucci <dlbucci@superftc.com>",
   "description": "JS13K 2025",
   "dependencies": {
     "@types/pg": "^8.15.5",
@@ -21,7 +21,11 @@
   "scripts": {
     "build": "rokay build",
     "start": "rokay server:run",
-    "watch": "rokay watch"
+    "watch": "rokay watch",
+    "package": "npm run package:html && npm run package:zip && npm run package:size",
+    "package:html": "curl localhost:4141 -H 'Accept: text/html' > static/index.html",
+    "package:size": "ls -al static/build.zip | awk '{print $5}'",
+    "package:zip": "cd static && zip build.zip art/**/*.png index.html kiki.js manifest.json"
   },
   "type": "module",
   "version": "1.0.0"
