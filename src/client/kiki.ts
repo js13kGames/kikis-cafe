@@ -4,7 +4,7 @@ import { code, h2 } from "rokay/browser/elt"
 import { mount } from "rokay/browser/mount"
 import { BrowserRouter } from "rokay/browser/router"
 import { WindowSize } from "rokay/browser/window"
-import { divide, floor_ } from "rokay/math/v"
+import { divide, floor_, VZ } from "rokay/math/v"
 import { derive } from "rokay/prop/derive"
 
 import { Cat } from "../shared/cats/types.gen.js"
@@ -30,7 +30,7 @@ mount(document.body, () => {
         }
       }),
     },
-    world = World([Cat("#000", "#ff0")])
+    world = World([Cat("#000", "#ff0", VZ)])
 
   return Base(app, router.match([...IndexPages({ appClient: app, world })], (path) => h2(
     apd("Page ", code(apd(path)), " Not Found"),
