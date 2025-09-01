@@ -1,4 +1,3 @@
-import { getUserAsink } from "okay-site-login/client/users/service"
 import { apd } from "rokay/browser/core"
 import { code, h2 } from "rokay/browser/elt"
 import { mount } from "rokay/browser/mount"
@@ -20,7 +19,6 @@ mount(document.body, () => {
     router = BrowserRouter(),
     app: AppClient = {
       router,
-      user: getUserAsink(),
       size: derive(WindowSize(), (windowSize) => {
         const zoom = 4
         return {

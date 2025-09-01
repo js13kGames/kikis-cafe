@@ -8,6 +8,7 @@ import { size, transform, transformOrigin } from "rokay/browser/style"
 import { int } from "rokay/math/random"
 import { V } from "rokay/math/v"
 import { mix } from "rokay/mix"
+import { Prop } from "rokay/prop/prop"
 
 import { RandomCat } from "../../shared/cats/model"
 import { World } from "../../shared/world/types.gen"
@@ -35,13 +36,20 @@ export const
                 drawer.cat(cat)
               })
             },
+
             step = () => {
+              ticks.set(ticks.get() - 1)
               if (Math.random() < CAT_RATE) {
                 world.cats.push(RandomCat(
                   V(int(0, app.size.get().size.x), int(0, app.size.get().size.y)),
                 ))
               }
+              world.cats.forEach((_cat) => {
+                // cat step
+              })
             },
+
+            ticks = Prop(0),
             loop = Loop(() => {
               step()
               draw()
