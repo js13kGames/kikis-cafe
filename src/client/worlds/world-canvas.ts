@@ -1,13 +1,10 @@
 import { onDestroy } from "#rokay/capture"
-import { apd } from "#rokay/core"
 import { size as sizeAttr } from "rokay/browser/attr"
-import { canvas, div } from "rokay/browser/elt"
+import { canvas } from "rokay/browser/elt"
 import { Loop } from "rokay/browser/game/loop"
 import { $ } from "rokay/browser/prop"
-import { size, transform, transformOrigin } from "rokay/browser/style"
 import { int } from "rokay/math/random"
 import { V } from "rokay/math/v"
-import { mix } from "rokay/mix"
 import { Prop } from "rokay/prop/prop"
 
 import { RandomCat } from "../../shared/cats/model"
@@ -19,47 +16,38 @@ import { CAT_RATE } from "../rates"
 
 
 export const
-  WorldWrapper = (app: AppClient, assets: Assets, world: World) => {
-    return div(
-      $(app.size, ({ size: { x, y }, zoom }) => mix(
-        size(x + "px", y + "px"),
-        transform(`scale(${zoom})`),
-      )),
-      transformOrigin("top left"),
-      apd(canvas(
-        $(app.size, ({ size: { x, y } }) => sizeAttr(x, y)),
-        withDrawer(assets, (drawer) => {
-          const
-            draw = () => {
-              drawer.bg()
-              world.cats.forEach((cat) => {
-                drawer.cat(cat)
-              })
-            },
-
-            step = () => {
-              ticks.set(ticks.get() - 1)
-              if (Math.random() < CAT_RATE) {
-                world.cats.push(RandomCat(
-                  V(int(0, app.size.get().size.x), int(0, app.size.get().size.y)),
-                ))
-              }
-              world.cats.forEach((_cat) => {
-                // cat step
-              })
-            },
-
-            ticks = Prop(0),
-            loop = Loop(() => {
-              step()
-              draw()
-            })
-              .start()
-
-          onDestroy(() => {
-            loop.destroy()
+  WorldCanvas = (app: AppClient, assets: Assets, world: World) => canvas(
+    $(app.size, ({ size: { x, y } }) => sizeAttr(x, y)),
+    withDrawer(assets, (drawer) => {
+      const
+        draw = () => {
+          drawer.bg()
+          world.cats.forEach((cat) => {
+            drawer.cat(cat)
           })
-        }),
-      )),
-    )
-  }
+        },
+
+        step = () => {
+          ticks.set(ticks.get() - 1)
+          if (Math.random() < CAT_RATE) {
+            world.cats.push(RandomCat(
+              V(int(0, app.size.get().size.x), int(0, app.size.get().size.y)),
+            ))
+          }
+          world.cats.forEach((_cat) => {
+            // cat step
+          })
+        },
+
+        ticks = Prop(0),
+        loop = Loop(() => {
+          step()
+          draw()
+        })
+          .start()
+
+      onDestroy(() => {
+        loop.destroy()
+      })
+    }),
+  )
