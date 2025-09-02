@@ -9,6 +9,16 @@ body {
   color: #fff;
 }
 
+button {
+  background-color: #f00;
+  border: 1px solid #000;
+  border-radius: 0;
+  padding: 4px;
+}
+button:active {
+  background-color: #c00;
+}
+
 canvas, img {
   display: block;
   image-rendering: pixelated;

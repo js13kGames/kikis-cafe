@@ -78,7 +78,7 @@ mount(document.body, () => {
           : state.t === "store" ?
             StorePage()
           :
-            WorkPage()
+            WorkPage(app, assets)
         ),
 
         div(
