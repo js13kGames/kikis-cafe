@@ -1,5 +1,7 @@
+import { onDestroy } from "#rokay/capture"
 import { apd } from "rokay/browser/core"
 import { a, div } from "rokay/browser/elt"
+import { Loop } from "rokay/browser/game/loop"
 import { match } from "rokay/browser/match"
 import { mount } from "rokay/browser/mount"
 import { $ } from "rokay/browser/prop"
@@ -12,6 +14,7 @@ import { divide, floor_, V } from "rokay/math/v"
 import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
+import { Prop } from "rokay/prop/prop"
 import { matchOpt } from "rokay/route/router"
 
 import { RandomCat } from "../shared/cats/model.js"
@@ -24,6 +27,7 @@ import { Base } from "./base.syn.js"
 import { Loader } from "./elts/loader.js"
 import { TextCanvas } from "./elts/text-canvas.js"
 import { InsidePage } from "./inside.pag.js"
+import { CAT_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
 import { WorkPage } from "./work.pag.js"
 import { WorldCanvas } from "./worlds/world-canvas.js"
@@ -31,6 +35,16 @@ import { WorldCanvas } from "./worlds/world-canvas.js"
 
 mount(document.body, () => {
   const
+    step = () => {
+      ticks.set(ticks.get() - 1)
+      if (Math.random() < CAT_RATE) {
+        world.cats.push(RandomCat(V(int(0, app.size.get().size.x), int(0, app.size.get().size.y))))
+      }
+      world.cats.forEach((_cat) => {
+        // cat step
+      })
+    },
+
     router = BrowserRouter(),
     app: AppClient = {
       router,
@@ -57,9 +71,19 @@ mount(document.body, () => {
       ],
       () => StateOutside(),
     ),
+    ticks = Prop(0),
     world = World(tab(10, () =>
       RandomCat(V(int(0, app.size.get().size.x), int(0, app.size.get().size.y)))
-    ))
+    )),
+
+    loop = Loop(() => {
+      step()
+    })
+      .start()
+
+  onDestroy(() => {
+    loop.destroy()
+  })
 
   return Base(app, Loader(assets, (assets) =>
     div(
