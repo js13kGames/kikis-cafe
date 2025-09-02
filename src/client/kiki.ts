@@ -4,7 +4,7 @@ import { match } from "rokay/browser/match"
 import { mount } from "rokay/browser/mount"
 import { $ } from "rokay/browser/prop"
 import { BrowserRouter } from "rokay/browser/router"
-import { bottom, display, position, size, transform, transformOrigin, width } from "rokay/browser/style"
+import { bottom, display, gap, overflow, padding, position, size, transform, transformOrigin, width } from "rokay/browser/style"
 import { WindowSize } from "rokay/browser/window"
 import { tab } from "rokay/data/array"
 import { int } from "rokay/math/random"
@@ -22,6 +22,7 @@ import { AppClient } from "./app.js"
 import { load } from "./assets.js"
 import { Base } from "./base.syn.js"
 import { Loader } from "./elts/loader.js"
+import { TextCanvas } from "./elts/text-canvas.js"
 import { InsidePage } from "./inside.pag.js"
 import { StorePage } from "./store.pag.js"
 import { WorkPage } from "./work.pag.js"
@@ -80,12 +81,21 @@ mount(document.body, () => {
             WorkPage()
         ),
 
-        div(position("absolute"), bottom(0), display("flex"), width("100%"), apd(
-          a(app.router.href(pgIndex()), apd("Outside")),
-          a(app.router.href(pgInside()), apd("Inside")),
-          a(app.router.href(pgWork()), apd("Work")),
-          a(app.router.href(pgStore()), apd("Store")),
-        )),
+        div(
+          position("absolute"),
+          bottom(0),
+          display("flex"),
+          gap("8px"),
+          overflow("auto"),
+          padding("8px"),
+          width("100%"),
+          apd(
+            a(app.router.href(pgIndex()), apd(TextCanvas("Outside"))),
+            a(app.router.href(pgInside()), apd(TextCanvas("Inside"))),
+            a(app.router.href(pgWork()), apd(TextCanvas("Work"))),
+            a(app.router.href(pgStore()), apd(TextCanvas("Store"))),
+          ),
+        ),
       ),
     )
   ))
