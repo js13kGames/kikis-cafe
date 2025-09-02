@@ -1,7 +1,7 @@
 import { pick } from "rokay/math/random"
 import { V } from "rokay/math/v"
 
-import { Cat } from "./types.gen"
+import { Cat, CatStateStand } from "./types.gen"
 
 
 export const
@@ -11,4 +11,4 @@ export const
   CAT_EYES = ["#ff0", "#0f0", "#00f"],
 
   RandomCat = (pos: V) =>
-    Cat(pick(CAT_COATS), pick(CAT_EYES), pos)
+    Cat(pick(CAT_COATS), pick(CAT_EYES), pos, V(pick([-1, 1]), 1), CatStateStand())
