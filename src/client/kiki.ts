@@ -30,6 +30,7 @@ import { InsidePage } from "./inside.pag.js"
 import { CAT_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
 import { WorkPage } from "./work.pag.js"
+import { WorldFM } from "./world/form-models.gen.js"
 import { WorldCanvas } from "./worlds/world-canvas.js"
 
 
@@ -72,9 +73,13 @@ mount(document.body, () => {
       () => StateOutside(),
     ),
     ticks = Prop(0),
-    world = World(tab(10, () =>
-      RandomCat(V(int(0, app.size.get().size.x), int(0, app.size.get().size.y)))
-    )),
+    world = World(
+      100,
+      tab(10, () => RandomCat(V(int(0, app.size.get().size.x), int(0, app.size.get().size.y)))),
+      [],
+      new Date().toISOString(),
+    ),
+    worldFM = WorldFM(world),
 
     loop = Loop(() => {
       step()
@@ -98,11 +103,11 @@ mount(document.body, () => {
           state.t === "inside" ?
             InsidePage(app, assets)
           : state.t === "outside" ?
-            WorldCanvas(app, assets, world)
+            WorldCanvas(app, assets, worldFM)
           : state.t === "store" ?
             StorePage(app, assets)
           :
-            WorkPage(app, assets)
+            WorkPage(app, assets, worldFM)
         ),
 
         div(
