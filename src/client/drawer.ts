@@ -9,6 +9,8 @@ import { CatCanvas } from "./cats/cat-canvas"
 
 export type Drawer = {
   bg(): void
+  bgInside(): void
+  bgStore(): void
   bgWork(): void
   cat(cat: Cat): void
 }
@@ -20,6 +22,22 @@ export const
 
     cb({
       bg() {
+        const SKY_HEIGHT_PX = 48
+        ctx.fillStyle = "hsl(232, 70%, 56%)"
+        ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+        ctx.fillStyle = "hsl(120, 70%, 60%)"
+        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+      },
+
+      bgInside() {
+        const SKY_HEIGHT_PX = 48
+        ctx.fillStyle = "hsl(32, 70%, 76%)"
+        ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+        ctx.fillStyle = "hsl(100, 70%, 41%)"
+        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+      },
+
+      bgStore() {
         const SKY_HEIGHT_PX = 48
         ctx.fillStyle = "hsl(232, 70%, 56%)"
         ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)

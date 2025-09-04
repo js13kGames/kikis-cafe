@@ -96,11 +96,11 @@ mount(document.body, () => {
       apd(
         match(state, (state) =>
           state.t === "inside" ?
-            InsidePage()
+            InsidePage(app, assets)
           : state.t === "outside" ?
             WorldCanvas(app, assets, world)
           : state.t === "store" ?
-            StorePage()
+            StorePage(app, assets)
           :
             WorkPage(app, assets)
         ),
