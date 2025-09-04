@@ -37,7 +37,13 @@ export const
 
       cat(cat) {
         const canvas = getOrPut(canvases, cat, () => CatCanvas(cat, assets.cat))
-        ctx.drawImage(canvas, 0, 0, 16, 16, cat.pos.x, cat.pos.y, 16, 16)
+        ctx.save()
+        ctx.translate(cat.pos.x, cat.pos.y)
+        ctx.scale(cat.scale.x, cat.scale.y)
+        ctx.fillStyle = "rgba(0,0,0,.5)"
+        ctx.fillRect(-5, -2, 10, 4)
+        ctx.drawImage(canvas, 0, 0, 16, 16, -8, -13, 16, 16)
+        ctx.restore()
       },
     })
   })
