@@ -1,12 +1,16 @@
-import { TypeADT, TypeArray, TypeInt, TypeObject, TypeProp, TypeString } from "rokay/route/type"
+import { TypeADT, TypeArray, TypeInt, TypeObject, TypeOptional, TypeProp, TypeString } from "rokay/route/type"
 
 import { Cat } from "../cats/types"
 
 
 export const
   State = TypeADT({
-    "outside": {},
-    "inside": {},
+    "outside": {
+      focus: TypeOptional(Cat),
+    },
+    "inside": {
+      focus: TypeOptional(Cat),
+    },
     "work": {},
     "store": {},
   }),

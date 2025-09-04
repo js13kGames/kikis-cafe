@@ -9,23 +9,45 @@ import { CatCanvas } from "./cats/cat-canvas"
 
 
 export type Drawer = {
+  ctx: CanvasRenderingContext2D
   bg(): void
   bgInside(): void
   bgStore(): void
   bgWork(): void
   cat(cat: Cat): void
   clear(): void
+  focus(cat: Cat | undefined): void
   text(text: string): void
+  track(cb: () => void): void
+}
+
+export type Interp = {
+  get(): number
+  set(_target: number): void
+  step(): void
 }
 
 
 export const
   withDrawer = (assets: Assets, cb: (drawer: Drawer) => void) => withCtx((ctx) => {
+    ctx.imageSmoothingEnabled = false
+
     const
       catCanvases = new Map<Cat, HTMLCanvasElement>(),
-      letterCanvases = new Map<string, HTMLCanvasElement>()
+      letterCanvases = new Map<string, HTMLCanvasElement>(
+        ["$", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].map((letter) =>
+          [letter, TextCanvas(letter)]
+        ),
+      ),
+      x = Interp(Math.floor(ctx.canvas.width / 2)),
+      y = Interp(Math.floor(ctx.canvas.height / 2)),
+      zoom = Interp(1)
 
-    cb({
+    let focus: Cat | undefined
+
+    const drawer: Drawer = {
+      ctx,
+
       bg() {
         const SKY_HEIGHT_PX = 48
         ctx.fillStyle = "hsl(232, 70%, 56%)"
@@ -71,6 +93,18 @@ export const
 
       clear() { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) },
 
+      focus(cat) {
+        if (focus = cat) {
+          x.set(cat.pos.x)
+          y.set(cat.pos.y)
+          zoom.set(5)
+        } else {
+          x.set(Math.floor(ctx.canvas.width / 2))
+          y.set(Math.floor(ctx.canvas.height / 2))
+          zoom.set(1)
+        }
+      },
+
       text(text: string) {
         ctx.save()
         const letters = text.split("")
@@ -81,5 +115,29 @@ export const
         })
         ctx.restore()
       },
-    })
-  })
+
+      track(cb: () => void) {
+        ctx.save()
+        x.step()
+        y.step()
+        zoom.step()
+        ctx.translate(Math.floor(ctx.canvas.width / 2), Math.floor(ctx.canvas.height / 2))
+        ctx.scale(zoom.get(), zoom.get())
+        ctx.translate(-Math.round(x.get()), -Math.round(y.get()))
+        cb()
+        ctx.restore()
+      },
+    }
+
+    cb(drawer)
+  }),
+
+  Interp = (value: number) => {
+    let target = value
+    const i: Interp = {
+      get() { return value },
+      set(_target) { target = _target },
+      step() { value = value + (target - value) / 20 },
+    }
+    return i
+  }

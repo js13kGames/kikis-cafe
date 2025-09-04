@@ -103,7 +103,7 @@ mount(document.body, () => {
           state.t === "inside" ?
             InsidePage(app, assets)
           : state.t === "outside" ?
-            WorldCanvas(app, assets, worldFM)
+            WorldCanvas(app, assets, state, worldFM)
           : state.t === "store" ?
             StorePage(app, assets)
           :

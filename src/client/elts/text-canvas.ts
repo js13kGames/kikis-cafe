@@ -8,12 +8,12 @@ export const
     text: string,
     { fill = "#fff", font = "9px monospace" }: { fill?: string, font?: string } = {},
   ) => {
-    const txt = canvas(size(1000, 1000), withCtx(
+    const txt = canvas(size(512, 32), withCtx(
       fills(fill),
       (ctx) => {
         ctx.font = font
       },
-      canText(text, 0, 1000),
+      canText(text, 0, 32),
       solidify(80),
       shrink,
     ))
