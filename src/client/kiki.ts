@@ -19,7 +19,7 @@ import { matchOpt } from "rokay/route/router"
 
 import { RandomCat } from "../shared/cats/model.js"
 import { pgIndex, pgInside, pgStore, pgWork } from "../shared/pages.gen.js"
-import { State, StateInside, StateOutside, StateStore, StateWork, World } from "../shared/world/types.gen.js"
+import { State, StateInside, StateOutside, StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
 
 import { AppClient } from "./app.js"
 import { load } from "./assets.js"
@@ -30,7 +30,7 @@ import { InsidePage } from "./inside.pag.js"
 import { CAT_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
 import { WorkPage } from "./work.pag.js"
-import { WorldFM } from "./world/form-models.gen.js"
+import { WorldFM } from "./worlds/form-models.gen.js"
 import { WorldCanvas } from "./worlds/world-canvas.js"
 
 

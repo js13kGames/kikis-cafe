@@ -1,8 +1,8 @@
-import { StateOutside } from "../shared/world/types.gen"
+import { StateOutside } from "../shared/worlds/types.gen"
 
 import { AppClient } from "./app"
 import { Assets } from "./assets"
-import { WorldFM } from "./world/form-models.gen"
+import { WorldFM } from "./worlds/form-models.gen"
 import { WorldCanvas } from "./worlds/world-canvas"
 
 

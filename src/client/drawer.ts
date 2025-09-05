@@ -43,8 +43,6 @@ export const
       y = Interp(Math.floor(ctx.canvas.height / 2)),
       zoom = Interp(1)
 
-    let focus: Cat | undefined
-
     const drawer: Drawer = {
       ctx,
 
@@ -94,7 +92,7 @@ export const
       clear() { ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height) },
 
       focus(cat) {
-        if (focus = cat) {
+        if (cat) {
           x.set(cat.pos.x)
           y.set(cat.pos.y)
           zoom.set(5)

@@ -6,11 +6,11 @@ import { onMousedown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
 import { divide_, floor_, V } from "rokay/math/v"
 
-import { StateOutside } from "../../shared/world/types.gen"
+import { StateOutside } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
 import { Assets } from "../assets"
 import { withDrawer } from "../drawer"
-import { WorldFM } from "../world/form-models.gen"
+import { WorldFM } from "../worlds/form-models.gen"
 
 
 export const

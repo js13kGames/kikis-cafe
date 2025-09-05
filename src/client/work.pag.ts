@@ -11,7 +11,7 @@ import { AppClient } from "./app"
 import { Assets } from "./assets"
 import { withDrawer } from "./drawer"
 import { TextCanvas } from "./elts/text-canvas"
-import { WorldFM } from "./world/form-models.gen"
+import { WorldFM } from "./worlds/form-models.gen"
 
 
 export const
