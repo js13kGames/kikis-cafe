@@ -13,7 +13,9 @@ export const
     splay: {},
     stand: {},
     stretch: {},
-    walk: {},
+    walk: {
+      to: V
+    },
   }),
 
   Cat = TypeObject({

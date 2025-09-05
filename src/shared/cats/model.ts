@@ -10,5 +10,7 @@ export const
   CAT_COATS = [...DARK_CAT_COATS, ...LIGHT_CAT_COATS],
   CAT_EYES = ["#ff0", "#0f0", "#00f", "#000"],
 
+  CAT_SPEED = 10 / 60,
+
   RandomCat = (pos: V) =>
     Cat(pick(CAT_COATS), pick(CAT_EYES), "", pos, V(pick([-1, 1]), 1), CatStateStand())
