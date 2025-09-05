@@ -2,10 +2,9 @@ import { TextCanvas } from "elts/text-canvas"
 import { withCtx } from "rokay/browser/game/danvas"
 import { getOrPut } from "rokay/data/map"
 
-import { Cat } from "../shared/cats/types.gen"
-
 import { Assets } from "./assets"
 import { CatCanvas } from "./cats/cat-canvas"
+import { CatFM } from "./cats/form-models.gen"
 
 
 export type Drawer = {
@@ -14,9 +13,9 @@ export type Drawer = {
   bgInside(): void
   bgStore(): void
   bgWork(): void
-  cat(cat: Cat): void
+  cat(cat: CatFM): void
   clear(): void
-  focus(cat: Cat | undefined): void
+  focus(cat: CatFM | undefined): void
   text(text: string): void
   track(cb: () => void): void
 }
@@ -33,7 +32,7 @@ export const
     ctx.imageSmoothingEnabled = false
 
     const
-      catCanvases = new Map<Cat, HTMLCanvasElement>(),
+      catCanvases = new Map<CatFM, HTMLCanvasElement>(),
       letterCanvases = new Map<string, HTMLCanvasElement>(
         ["$", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].map((letter) =>
           [letter, TextCanvas(letter)]

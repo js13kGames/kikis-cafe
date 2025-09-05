@@ -3,11 +3,12 @@ import { canvas } from "rokay/browser/elt"
 import { fills, outline, withCtx } from "rokay/browser/game/danvas"
 
 import { DARK_CAT_COATS } from "../../shared/cats/model"
-import { Cat } from "../../shared/cats/types.gen"
+
+import { CatFM } from "./form-models.gen"
 
 
 export const
-  CatCanvas = (cat: Cat, img: HTMLImageElement) => canvas(size(img.width, img.height), withCtx(
+  CatCanvas = (cat: CatFM, img: HTMLImageElement) => canvas(size(img.width, img.height), withCtx(
     (ctx) => {
       ctx.drawImage(img, 0, 0)
       const

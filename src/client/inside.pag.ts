@@ -9,21 +9,28 @@ import { bottom, display, justifyContent, position, width } from "rokay/browser/
 import { AppClient } from "./app"
 import { Assets } from "./assets"
 import { withDrawer } from "./drawer"
+import { StateInsideFM, WorldFM } from "./worlds/form-models.gen"
 
 
 export const
-  InsidePage = (app: AppClient, assets: Assets) => div(position("relative"), apd(
-    canvas($(app.size, ({ size: { x, y} }) => size(x, y)), withDrawer(assets, (drawer) => {
-      const loop = Loop(() => {
-        drawer.bgInside()
-      })
-        .start()
+  InsidePage = (app: AppClient, assets: Assets, _state: StateInsideFM, world: WorldFM) => div(
+    position("relative"),
+    apd(
+      canvas($(app.size, ({ size: { x, y} }) => size(x, y)), withDrawer(assets, (drawer) => {
+        const loop = Loop(() => {
+          drawer.bgInside()
+          world.catsInside.get().forEach((cat) => {
+            drawer.cat(cat)
+          })
+        })
+          .start()
 
-      onDestroy(() => {
-        loop.destroy()
-      })
-    })),
-    div(bottom("24px"), display("flex"), justifyContent("center"), position("absolute"), width(
-      "100%",
-    )),
-  ))
+        onDestroy(() => {
+          loop.destroy()
+        })
+      })),
+      div(bottom("24px"), display("flex"), justifyContent("center"), position("absolute"), width(
+        "100%",
+      )),
+    ),
+  )

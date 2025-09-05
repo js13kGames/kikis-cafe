@@ -19,7 +19,7 @@ import { matchOpt } from "rokay/route/router"
 
 import { RandomCat } from "../shared/cats/model.js"
 import { pgIndex, pgInside, pgStore, pgWork } from "../shared/pages.gen.js"
-import { State, StateInside, StateOutside, StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
+import { StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
 
 import { AppClient } from "./app.js"
 import { load } from "./assets.js"
@@ -30,7 +30,7 @@ import { InsidePage } from "./inside.pag.js"
 import { CAT_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
 import { WorkPage } from "./work.pag.js"
-import { WorldFM } from "./worlds/form-models.gen.js"
+import { StateFM, StateInsideFM, StateOutsideFM, WorldFM } from "./worlds/form-models.gen.js"
 import { WorldCanvas } from "./worlds/world-canvas.js"
 
 
@@ -62,15 +62,23 @@ mount(document.body, () => {
       gen: () => load(),
     }),
     state = router.derive<
-      State
+      StateFM
     >(
       [
-        matchOpt(/^\/?$/, ([_]) => StateOutside()),
-        matchOpt(/^\/inside\/?$/, () => StateInside()),
+        matchOpt(/^\/?$/, ([_]) => {
+          const state = StateOutsideFM({ t: "outside" })
+          state.focus.set(() => undefined)
+          return state
+        }),
+        matchOpt(/^\/inside\/?$/, () => {
+          const state = StateInsideFM({ t: "inside" })
+          state.focus.set(() => undefined)
+          return state
+        }),
         matchOpt(/^\/work\/?$/, () => StateWork()),
         matchOpt(/^\/store\/?$/, () => StateStore()),
       ],
-      () => StateOutside(),
+      () => StateOutsideFM(),
     ),
     ticks = Prop(0),
     world = World(
@@ -101,7 +109,7 @@ mount(document.body, () => {
       apd(
         match(state, (state) =>
           state.t === "inside" ?
-            InsidePage(app, assets)
+            InsidePage(app, assets, state, worldFM)
           : state.t === "outside" ?
             WorldCanvas(app, assets, state, worldFM)
           : state.t === "store" ?
