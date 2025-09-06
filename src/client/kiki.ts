@@ -1,4 +1,5 @@
 import { onDestroy } from "#rokay/capture"
+import { CatFM } from "cats/form-models.gen.js"
 import { apd } from "rokay/browser/core"
 import { a, div } from "rokay/browser/elt"
 import { Loop } from "rokay/browser/game/loop"
@@ -9,7 +10,7 @@ import { BrowserRouter } from "rokay/browser/router"
 import { bottom, display, gap, overflow, padding, position, size, transform, transformOrigin, width } from "rokay/browser/style"
 import { WindowSize } from "rokay/browser/window"
 import { tab } from "rokay/data/array"
-import { int } from "rokay/math/random"
+import { int, pick } from "rokay/math/random"
 import { divide, floor_, len, minus, plus_, scale_, unit, unitOfAng, V } from "rokay/math/v"
 import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
@@ -18,6 +19,7 @@ import { Prop } from "rokay/prop/prop"
 import { matchOpt } from "rokay/route/router"
 
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
+import { CatStateSit, CatStateStand, CatStateWalk } from "../shared/cats/types.gen.js"
 import { pgIndex, pgInside, pgStore, pgWork } from "../shared/pages.gen.js"
 import { StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
 
@@ -32,7 +34,6 @@ import { StorePage } from "./store.pag.js"
 import { WorkPage } from "./work.pag.js"
 import { StateFM, StateInsideFM, StateOutsideFM, WorldFM } from "./worlds/form-models.gen.js"
 import { WorldCanvas } from "./worlds/world-canvas.js"
-import { CatStateStand, CatStateWalk } from "../shared/cats/types.gen.js"
 
 
 mount(document.body, () => {
@@ -42,22 +43,28 @@ mount(document.body, () => {
       if (Math.random() < CAT_RATE) {
         world.cats.push(RandomCat(V(int(0, app.size.get().size.x), int(0, app.size.get().size.y))))
       }
-      worldFM.cats.get().forEach((cat) => {
-        if (cat.state.t === "stand") {
-          if (Math.random() < 1 / 360) {
-            cat.state = CatStateWalk(plus_(scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)), cat.pos))
-            cat.scale.x = cat.state.to.x < cat.pos.x ? -1 : 1
-          }
-        } else if (cat.state.t === "walk") {
-          const diff = minus(cat.state.to, cat.pos)
-          if (len(diff) < CAT_SPEED) {
-            cat.pos = cat.state.to
-            cat.state = CatStateStand()
-          } else {
-            cat.pos = plus_(scale_(unit(diff), CAT_SPEED), cat.pos)
-          }
+      worldFM.cats.get().forEach(stepCat)
+      worldFM.catsInside.get().forEach(stepCat)
+    },
+
+    stepCat = (cat: CatFM) => {
+      if (cat.state.t === "sit" || cat.state.t === "stand") {
+        if (Math.random() < 1 / 360) {
+          cat.state = CatStateWalk(plus_(
+            scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)),
+            cat.pos,
+          ))
+          cat.scale.x = cat.state.to.x < cat.pos.x ? -1 : 1
         }
-      })
+      } else if (cat.state.t === "walk") {
+        const diff = minus(cat.state.to, cat.pos)
+        if (len(diff) < CAT_SPEED) {
+          cat.pos = cat.state.to
+          cat.state = pick([CatStateSit(), CatStateStand()])
+        } else {
+          cat.pos = plus_(scale_(unit(diff), CAT_SPEED), cat.pos)
+        }
+      }
     },
 
     router = BrowserRouter(),
@@ -75,9 +82,7 @@ mount(document.body, () => {
     assets = Asink({
       gen: () => load(),
     }),
-    state = router.derive<
-      StateFM
-    >(
+    state = router.derive<StateFM>(
       [
         matchOpt(/^\/?$/, ([_]) => {
           const state = StateOutsideFM({ t: "outside" })
