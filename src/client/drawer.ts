@@ -1,10 +1,11 @@
-import { TextCanvas } from "elts/text-canvas"
 import { withCtx } from "rokay/browser/game/danvas"
+import { tab } from "rokay/data/array"
 import { getOrPut } from "rokay/data/map"
 
 import { Assets } from "./assets"
 import { CatCanvas } from "./cats/cat-canvas"
 import { CatFM } from "./cats/form-models.gen"
+import { TextCanvas } from "./elts/text-canvas"
 
 
 export type Drawer = {
@@ -34,7 +35,7 @@ export const
     const
       catCanvases = new Map<CatFM, HTMLCanvasElement>(),
       letterCanvases = new Map<string, HTMLCanvasElement>(
-        ["$", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"].map((letter) =>
+        tab(0x7f - 0x21, (i) => String.fromCharCode(0x21 + i)).map((letter) =>
           [letter, TextCanvas(letter)]
         ),
       ),
@@ -70,6 +71,10 @@ export const
         ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
         ctx.fillStyle = "hsl(100, 70%, 41%)"
         ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+        ctx.fillStyle = "hsl(34, 68%, 32%)"
+        ctx.fillRect(0, SKY_HEIGHT_PX - 3, ctx.canvas.width, 3)
+        ctx.fillStyle = "#000"
+        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
       },
 
       bgStore() {
@@ -78,6 +83,8 @@ export const
         ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
         ctx.fillStyle = "hsl(120, 70%, 60%)"
         ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+        ctx.fillStyle = "#000"
+        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
       },
 
       bgWork() {
@@ -86,6 +93,8 @@ export const
         ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
         ctx.fillStyle = "hsl(30, 30%, 30%)"
         ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+        ctx.fillStyle = "#000"
+        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
       },
 
       cat(cat) {

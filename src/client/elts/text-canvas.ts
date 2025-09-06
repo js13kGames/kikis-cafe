@@ -19,7 +19,10 @@ export const
     ))
 
     return canvas(size(txt.width + 2, txt.height + 2), withCtx(
-      image(txt, 0, 0, txt.width, txt.height, 1, 1, txt.width, txt.height),
+      txt.width || txt.height ?
+        image(txt, 0, 0, txt.width, txt.height, 1, 1, txt.width, txt.height)
+      :
+        () => {},
       fills("#000"),
       outline(1),
     ))
