@@ -11,7 +11,7 @@ import { bottom, display, gap, overflow, padding, position, size, transform, tra
 import { WindowSize } from "rokay/browser/window"
 import { tab } from "rokay/data/array"
 import { int, pick } from "rokay/math/random"
-import { divide, floor_, len, minus, plus_, scale_, unit, unitOfAng, V } from "rokay/math/v"
+import { divide, floor_, len, minus, plus_, scale_, unit, unitOfAng, V, WV } from "rokay/math/v"
 import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
@@ -38,11 +38,15 @@ import { WorldCanvas } from "./worlds/world-canvas.js"
 
 mount(document.body, () => {
   const
+    bound_ = (v: WV, { min, max }: { min: V, max: V }) => {
+      v.x = Math.max(min.x, Math.min(v.x, max.x))
+      v.y = Math.max(min.y, Math.min(v.y, max.y))
+      return v
+    },
+
     step = () => {
       ticks.set(ticks.get() - 1)
-      if (Math.random() < CAT_RATE) {
-        world.cats.push(RandomCat(V(int(0, app.size.get().size.x), int(0, app.size.get().size.y))))
-      }
+      if (Math.random() < CAT_RATE) { world.cats.push(RandomCat(app.size.get().bounds)) }
       worldFM.cats.get().forEach(stepCat)
       worldFM.catsInside.get().forEach(stepCat)
     },
@@ -50,9 +54,9 @@ mount(document.body, () => {
     stepCat = (cat: CatFM) => {
       if (cat.state.t === "sit" || cat.state.t === "stand") {
         if (Math.random() < 1 / 360) {
-          cat.state = CatStateWalk(plus_(
-            scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)),
-            cat.pos,
+          cat.state = CatStateWalk(bound_(
+            plus_(scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)), cat.pos),
+            app.size.get().bounds,
           ))
           cat.scale.x = cat.state.to.x < cat.pos.x ? -1 : 1
         }
@@ -72,8 +76,10 @@ mount(document.body, () => {
       router,
       size: derive(WindowSize(), (windowSize) => {
         const zoom = 4
+        const size = floor_(divide(windowSize, zoom))
         return {
-          size: floor_(divide(windowSize, zoom)),
+          bounds: { min: V(0, 48), max: V(size.x, size.y) },
+          size,
           windowSize,
           zoom,
         }
@@ -102,7 +108,7 @@ mount(document.body, () => {
     ticks = Prop(0),
     world = World(
       100,
-      tab(10, () => RandomCat(V(int(0, app.size.get().size.x), int(0, app.size.get().size.y)))),
+      tab(10, () => RandomCat(app.size.get().bounds)),
       [],
       new Date().toISOString(),
     ),
