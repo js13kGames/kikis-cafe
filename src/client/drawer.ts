@@ -49,10 +49,19 @@ export const
 
       bg() {
         const SKY_HEIGHT_PX = 48
-        ctx.fillStyle = "hsl(232, 70%, 56%)"
+        ctx.fillStyle = "hsl(12, 70%, 56%)"
         ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
         ctx.fillStyle = "hsl(120, 70%, 60%)"
         ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+        ctx.fillStyle = "#fff"
+        for (let i = 0; i < SKY_HEIGHT_PX; i += 3) {
+          ctx.fillRect(0, i, ctx.canvas.width, 1)
+          for (let x = i % 2 ? 3 : 0; x < ctx.canvas.width; x += 6) {
+            ctx.fillRect(x, i + 1, 1, 2)
+          }
+        }
+        ctx.fillStyle = "#000"
+        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
       },
 
       bgInside() {
