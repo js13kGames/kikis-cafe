@@ -13,7 +13,7 @@ export const
       (ctx) => {
         ctx.font = font
       },
-      canText(text, 0, 32),
+      canText(text, 0, 24),
       solidify(80),
       shrink,
     ))
