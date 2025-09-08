@@ -27,3 +27,7 @@ canvas, img {
 h1, h2, p {
   margin: 1em 0 .5em;
 }
+
+input {
+  border: 1px solid #000;
+}

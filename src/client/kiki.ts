@@ -21,7 +21,7 @@ import { matchOpt } from "rokay/route/router"
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
 import { CatStateSit, CatStateStand, CatStateWalk } from "../shared/cats/types.gen.js"
 import { pgIndex, pgInside, pgStore, pgWork } from "../shared/pages.gen.js"
-import { StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
+import { ActiveStateGlobal, StateInside, StateOutside, StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
 
 import { AppClient } from "./app.js"
 import { load } from "./assets.js"
@@ -88,18 +88,12 @@ mount(document.body, () => {
     assets = Asink({
       gen: () => load(),
     }),
-    state = router.derive<StateFM>(
+    state = router.derive<
+      StateFM
+    >(
       [
-        matchOpt(/^\/?$/, ([_]) => {
-          const state = StateOutsideFM({ t: "outside" })
-          state.focus.set(() => undefined)
-          return state
-        }),
-        matchOpt(/^\/inside\/?$/, () => {
-          const state = StateInsideFM({ t: "inside" })
-          state.focus.set(() => undefined)
-          return state
-        }),
+        matchOpt(/^\/?$/, ([_]) => StateOutsideFM(StateOutside(ActiveStateGlobal()))),
+        matchOpt(/^\/inside\/?$/, () => StateInsideFM(StateInside(ActiveStateGlobal()))),
         matchOpt(/^\/work\/?$/, () => StateWork()),
         matchOpt(/^\/store\/?$/, () => StateStore()),
       ],

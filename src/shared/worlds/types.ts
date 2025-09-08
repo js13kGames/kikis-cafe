@@ -4,9 +4,15 @@ import { Cat } from "../cats/types"
 
 
 export const
+  ActiveState = TypeADT({
+    global: {},
+    focus: { cat: Cat },
+    name: { cat: Cat },
+  }),
+
   State = TypeADT({
-    "outside": { focus: TypeProp(Cat, { editable: true, optional: true }) },
-    "inside": { focus: TypeProp(Cat, { editable: true, optional: true }) },
+    "outside": { state: TypeProp(ActiveState, { editable: true }) },
+    "inside": { state: TypeProp(ActiveState, { editable: true }) },
     "work": {},
     "store": {},
   }),
