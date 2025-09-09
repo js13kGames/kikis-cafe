@@ -48,6 +48,11 @@ mount(document.body, () => {
 
     step = () => {
       ticks.set(ticks.get() - 1)
+      worldFM.time.set((_time) => {
+        const next = new Date(_time)
+        next.setSeconds(next.getSeconds() + 1)
+        return next.toISOString()
+      })
       if (Math.random() < CAT_RATE) { world.cats.push(RandomCat(app.size.get().bounds)) }
       worldFM.cats.get().forEach(stepCat)
       worldFM.catsInside.get().forEach(stepCat)
@@ -150,7 +155,6 @@ mount(document.body, () => {
                 month: "numeric",
                 day: "numeric",
                 hour: "numeric",
-                minute: "numeric",
               }))
             },
           )),
