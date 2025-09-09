@@ -132,7 +132,7 @@ export const
 
 const
   InnerHUD = (...args: MixArgs<HTMLDivElement>) => div(
-    bottom("24px"),
+    bottom("0"),
     display("flex"),
     flexDirection("column"),
     justifyContent("space-between"),
