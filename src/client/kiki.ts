@@ -1,5 +1,4 @@
 import { onDestroy } from "#rokay/capture"
-import { CatFM } from "cats/form-models.gen.js"
 import { apd } from "rokay/browser/core"
 import { a, div } from "rokay/browser/elt"
 import { Loop } from "rokay/browser/game/loop"
@@ -7,7 +6,8 @@ import { match } from "rokay/browser/match"
 import { mount } from "rokay/browser/mount"
 import { $ } from "rokay/browser/prop"
 import { BrowserRouter } from "rokay/browser/router"
-import { bottom, display, gap, overflow, padding, position, size, transform, transformOrigin, width } from "rokay/browser/style"
+import { alignItems, flex, gap, justifyContent, overflow, padding, size, transform, transformOrigin,
+  width } from "rokay/browser/style"
 import { WindowSize } from "rokay/browser/window"
 import { tab } from "rokay/data/array"
 import { int, pick } from "rokay/math/random"
@@ -26,11 +26,13 @@ import { ActiveStateGlobal, StateInside, StateOutside, StateStore, StateWork, Wo
 import { AppClient } from "./app.js"
 import { load } from "./assets.js"
 import { Base } from "./base.syn.js"
+import { CatFM } from "./cats/form-models.gen.js"
 import { Loader } from "./elts/loader.js"
 import { TextCanvas } from "./elts/text-canvas.js"
 import { InsidePage } from "./inside.pag.js"
 import { CAT_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
+import { $flexCol, $flexRow, $relative } from "./style/utils.gen.js"
 import { WorkPage } from "./work.pag.js"
 import { StateFM, StateInsideFM, StateOutsideFM, WorldFM } from "./worlds/form-models.gen.js"
 import { WorldCanvas } from "./worlds/world-canvas.js"
@@ -71,12 +73,15 @@ mount(document.body, () => {
       }
     },
 
+    TOP_HEIGHT = 17,
+
     router = BrowserRouter(),
     app: AppClient = {
       router,
       size: derive(WindowSize(), (windowSize) => {
         const zoom = 4
         const size = floor_(divide(windowSize, zoom))
+        size.y -= 2 * TOP_HEIGHT // top and bottom bars
         return {
           bounds: { min: V(0, 48), max: V(size.x, size.y) },
           size,
@@ -119,13 +124,38 @@ mount(document.body, () => {
 
   return Base(app, Loader(assets, (assets) =>
     div(
-      position("relative"),
+      $flexCol,
+      $relative,
       $(app.size, ({ size: { x, y }, zoom }) => mix(
         size(x + "px", y + "px"),
         transform(`scale(${zoom})`),
       )),
       transformOrigin("top left"),
       apd(
+        div(
+          alignItems("start"),
+          flex(`0 0 ${TOP_HEIGHT}px`),
+          $flexRow,
+          justifyContent("space-between"),
+          overflow("auto"),
+          padding("4px 4px 3px"),
+          $relative,
+          width("100%"),
+          apd(match(worldFM.cash, (_cash) => TextCanvas(`$${_cash}`)), match(
+            worldFM.time,
+            (_time) => {
+              const date = new Date(_time)
+              return TextCanvas(date.toLocaleString(undefined, {
+                year: "numeric",
+                month: "numeric",
+                day: "numeric",
+                hour: "numeric",
+                minute: "numeric",
+              }))
+            },
+          )),
+        ),
+
         match(state, (state) =>
           state.t === "inside" ?
             InsidePage(app, assets, state, worldFM)
@@ -138,12 +168,12 @@ mount(document.body, () => {
         ),
 
         div(
-          position("absolute"),
-          bottom(0),
-          display("flex"),
-          gap("8px"),
+          flex(`0 0 ${TOP_HEIGHT}px`),
+          $flexRow,
+          gap("4px"),
+          justifyContent("space-between"),
           overflow("auto"),
-          padding("8px"),
+          padding("4px"),
           width("100%"),
           apd(
             a(app.router.href(pgIndex()), apd(TextCanvas("Outside"))),
