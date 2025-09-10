@@ -28,7 +28,7 @@ import { load } from "./assets.js"
 import { Base } from "./base.syn.js"
 import { CatFM } from "./cats/form-models.gen.js"
 import { Loader } from "./elts/loader.js"
-import { TextCanvas } from "./elts/text-canvas.js"
+import { TextCanvas, TextCanvas2 } from "./elts/text-canvas.js"
 import { InsidePage } from "./inside.pag.js"
 import { CAT_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
@@ -180,10 +180,10 @@ mount(document.body, () => {
           padding("4px"),
           width("100%"),
           apd(
-            a(app.router.href(pgIndex()), apd(TextCanvas("Outside"))),
-            a(app.router.href(pgInside()), apd(TextCanvas("Inside"))),
-            a(app.router.href(pgWork()), apd(TextCanvas("Work"))),
-            a(app.router.href(pgStore()), apd(TextCanvas("Store"))),
+            a(app.router.href(pgIndex()), apd(TextCanvas2("Outside", assets.font9))),
+            a(app.router.href(pgInside()), apd(TextCanvas2("Inside", assets.font9))),
+            a(app.router.href(pgWork()), apd(TextCanvas2("Work", assets.font9))),
+            a(app.router.href(pgStore()), apd(TextCanvas2("Store", assets.font9))),
           ),
         ),
       ),

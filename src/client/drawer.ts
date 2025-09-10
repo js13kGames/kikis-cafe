@@ -1,5 +1,4 @@
 import { withCtx } from "rokay/browser/game/danvas"
-import { tab } from "rokay/data/array"
 import { getOrPut } from "rokay/data/map"
 
 import { Assets } from "./assets"
@@ -34,11 +33,6 @@ export const
 
     const
       catCanvases = new Map<CatFM, HTMLCanvasElement>(),
-      letterCanvases = new Map<string, HTMLCanvasElement>(
-        tab(0x7f - 0x21, (i) => String.fromCharCode(0x21 + i)).map((letter) =>
-          [letter, TextCanvas(letter)]
-        ),
-      ),
       x = Interp(Math.floor(ctx.canvas.width / 2)),
       y = Interp(Math.floor(ctx.canvas.height / 2)),
       zoom = Interp(1)
@@ -129,11 +123,11 @@ export const
         }
       },
 
-      text(text: string) {
+      text(text: string, font: "font9" | "font12" | "font16" | "font16italic" = "font9") {
         ctx.save()
         const letters = text.split("")
         letters.forEach((letter) => {
-          const l = getOrPut(letterCanvases, letter, () => TextCanvas(letter))
+          const l = getOrPut(assets[font], letter, () => TextCanvas(letter))
           ctx.drawImage(l, 0, 0)
           ctx.translate(l.width, 0)
         })
