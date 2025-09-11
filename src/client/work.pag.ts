@@ -35,7 +35,12 @@ export const
         position("absolute"),
         width("100%"),
         apd(button(apd(TextCanvas2("WORK", assets.font16)), onClick(() => {
-          world.cash.set((_cash) => _cash + 5)
+          world.cash.set((_cash) => _cash + 20)
+          world.time.set((_time) => {
+            const next = new Date(_time)
+            next.setHours(next.getHours() + 1)
+            return next.toISOString()
+          })
         }))),
       ),
     ),
