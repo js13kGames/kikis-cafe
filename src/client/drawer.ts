@@ -32,7 +32,9 @@ export type Interp = {
 
 
 const
-  CARPET_COLOR = "hsl(245, 23%, 31%)"
+  BASE_BOARD_COLOR = "hsl(34, 68%, 32%)",
+  CARPET_COLOR = "hsl(245, 23%, 31%)",
+  GRASS_COLOR = "hsl(120, 70%, 60%)"
 
 
 export const
@@ -115,7 +117,7 @@ export const
             ctx.restore()
 
             // grass
-            ctx.fillStyle = "hsl(120, 70%, 60%)"
+            ctx.fillStyle = GRASS_COLOR
             ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
 
             // grass pattern
@@ -144,13 +146,32 @@ export const
             ctx.fillStyle = "hsl(32, 70%, 76%)"
             ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
 
+            // baseboard
+            ctx.fillStyle = BASE_BOARD_COLOR
+            ctx.fillRect(0, SKY_HEIGHT_PX - 3, ctx.canvas.width, 3)
+
+            // door
+            ctx.save()
+            ctx.fillStyle = BASE_BOARD_COLOR
+            ctx.translate(Math.floor(ctx.canvas.width / 2), SKY_HEIGHT_PX)
+            const DOOR_SIZE = SKY_HEIGHT_PX * 3 / 4
+            ctx.strokeStyle = BASE_BOARD_COLOR
+            ctx.lineWidth = 2
+            ctx.strokeRect(-DOOR_SIZE / 2 - .5, -DOOR_SIZE - .5, DOOR_SIZE + 2, DOOR_SIZE + 2)
+            ctx.lineWidth = 1
+            outlineBox(ctx, -DOOR_SIZE / 2, -DOOR_SIZE, DOOR_SIZE / 2, DOOR_SIZE, {
+              fill: GRASS_COLOR,
+              stroke: "hsl(0, 0%, 80%)",
+            })
+            outlineBox(ctx, 0, -DOOR_SIZE, DOOR_SIZE / 2, DOOR_SIZE, {
+              fill: GRASS_COLOR,
+              stroke: "hsl(0, 0%, 90%)",
+            })
+            ctx.restore()
+
             // carpet
             ctx.fillStyle = CARPET_COLOR
             ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
-
-            // baseboard
-            ctx.fillStyle = "hsl(34, 68%, 32%)"
-            ctx.fillRect(0, SKY_HEIGHT_PX - 3, ctx.canvas.width, 3)
 
             // seperator
             ctx.fillStyle = "#000"
