@@ -56,9 +56,9 @@ export const
           }
         }
         ctx.fillStyle = "rgba(0,0,0,.25)"
-        for (let y = SKY_HEIGHT_PX + 1; y < ctx.canvas.height; y += 4) {
-          for (let x = y % 8 === 5 ? 4 : 0; x < ctx.canvas.width; x += 8) {
-            ctx.fillRect(x, y, 4, 4)
+        for (let y = SKY_HEIGHT_PX + 1; y < ctx.canvas.height; y += 1) {
+          for (let x = y % 8; x < ctx.canvas.width; x += 8) {
+            ctx.fillRect(x, y, 4, 1)
           }
         }
         ctx.fillStyle = "#000"
