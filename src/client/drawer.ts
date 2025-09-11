@@ -1,6 +1,10 @@
+import { size as sizeAttr } from "rokay/browser/attr"
+import { canvas } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
 import { getOrPut } from "rokay/data/map"
+import { pick } from "rokay/math/random"
 
+import { AppClient } from "./app"
 import { Assets } from "./assets"
 import { CatCanvas } from "./cats/cat-canvas"
 import { CatFM } from "./cats/form-models.gen"
@@ -27,12 +31,37 @@ export type Interp = {
 }
 
 
+const
+  CARPET_COLOR = "hsl(245, 23%, 31%)"
+
+
 export const
-  withDrawer = (assets: Assets, cb: (drawer: Drawer) => void) => withCtx((ctx) => {
+  withDrawer = (app: AppClient, assets: Assets, cb: (drawer: Drawer) => void) => withCtx((ctx) => {
     ctx.imageSmoothingEnabled = false
 
     const
-      catCanvases = new Map<CatFM, HTMLCanvasElement>(),
+      outlineBox = (
+        ctx: CanvasRenderingContext2D,
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        {
+          fill = ctx.fillStyle,
+          stroke = ctx.strokeStyle,
+          strokeWidth = ctx.lineWidth,
+        }: {
+          fill?: CanvasRenderingContext2D["fillStyle"]
+          stroke?: CanvasRenderingContext2D["strokeStyle"]
+          strokeWidth?: number
+        },
+      ) => {
+        ctx.fillStyle = fill
+        ctx.fillRect(x + strokeWidth, y + strokeWidth, w - 2 * strokeWidth, h - 2 * strokeWidth)
+        ctx.strokeStyle = stroke
+        ctx.lineWidth = strokeWidth
+        ctx.strokeRect(x + strokeWidth, y + strokeWidth, w - strokeWidth, h - strokeWidth)
+      },
       x = Interp(Math.floor(ctx.canvas.width / 2)),
       y = Interp(Math.floor(ctx.canvas.height / 2)),
       zoom = Interp(1)
@@ -43,62 +72,130 @@ export const
       ctx,
 
       bg() {
-        const SKY_HEIGHT_PX = 48
-        ctx.fillStyle = "hsl(12, 70%, 56%)"
-        ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
-        ctx.fillStyle = "hsl(120, 70%, 60%)"
-        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
-        ctx.fillStyle = "#fff"
-        for (let i = 0; i < SKY_HEIGHT_PX; i += 3) {
-          ctx.fillRect(0, i, ctx.canvas.width, 1)
-          for (let x = i % 2 ? 3 : 0; x < ctx.canvas.width; x += 6) {
-            ctx.fillRect(x, i + 1, 1, 2)
-          }
-        }
-        ctx.fillStyle = "rgba(0,0,0,.25)"
-        for (let y = SKY_HEIGHT_PX + 1; y < ctx.canvas.height; y += 1) {
-          for (let x = y % 8; x < ctx.canvas.width; x += 8) {
-            ctx.fillRect(x, y, 4, 1)
-          }
-        }
-        ctx.fillStyle = "#000"
-        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+        const { size } = app.size.get()
+        const bg = getOrPut(assets.cached.bgs, `outside@${size.x},${size.y}`, () => canvas(
+          sizeAttr(size.x, size.y),
+          withCtx((ctx) => {
+            const SKY_HEIGHT_PX = 48
+            // brick wall
+            for (let i = 0; i < SKY_HEIGHT_PX; i += 3) {
+              for (let x = i % 2 ? -3 : 0; x < ctx.canvas.width; x += 6) {
+                outlineBox(ctx, x, i, 7, 4, {
+                  fill: pick([`hsl(12, 70%, ${pick(["51%", "56%", "61%", "66%"])})`]),
+                  stroke: "#fff",
+                })
+              }
+            }
+            /**
+             * ctx.fillStyle = "hsl(12, 70%, 56%)"
+             * ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+             *
+             * // brick grout
+             * ctx.fillStyle = "#fff"
+             * for (let i = 0; i < SKY_HEIGHT_PX; i += 3) {
+             * ctx.fillRect(0, i, ctx.canvas.width, 1)
+             * for (let x = i % 2 ? 3 : 0; x < ctx.canvas.width; x += 6) {
+             * ctx.fillRect(x, i + 1, 1, 2)
+             * }
+             * }
+             **/
+            // door
+            ctx.save()
+            ctx.fillStyle = "#999"
+            ctx.translate(Math.floor(ctx.canvas.width / 2), SKY_HEIGHT_PX)
+            const DOOR_SIZE = SKY_HEIGHT_PX * 3 / 4
+            outlineBox(ctx, -DOOR_SIZE / 2, -DOOR_SIZE, DOOR_SIZE / 2, DOOR_SIZE, {
+              fill: CARPET_COLOR,
+              stroke: "hsl(0, 0%, 80%)",
+            })
+            outlineBox(ctx, 0, -DOOR_SIZE, DOOR_SIZE / 2, DOOR_SIZE, {
+              fill: CARPET_COLOR,
+              stroke: "hsl(0, 0%, 90%)",
+            })
+            ctx.restore()
+
+            // grass
+            ctx.fillStyle = "hsl(120, 70%, 60%)"
+            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+
+            // grass pattern
+            ctx.fillStyle = "rgba(0,0,0,.25)"
+            for (let y = SKY_HEIGHT_PX + 1; y < ctx.canvas.height; y += 1) {
+              for (let x = y % 8; x < ctx.canvas.width; x += 8) {
+                ctx.fillRect(x, y, 4, 1)
+              }
+            }
+
+            // line at base of wall
+            ctx.fillStyle = "#000"
+            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+          }),
+        ))
+        ctx.drawImage(bg, 0, 0)
       },
 
       bgInside() {
-        const SKY_HEIGHT_PX = 48
-        ctx.fillStyle = "hsl(32, 70%, 76%)"
-        ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
-        ctx.fillStyle = "hsl(100, 70%, 41%)"
-        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
-        ctx.fillStyle = "hsl(34, 68%, 32%)"
-        ctx.fillRect(0, SKY_HEIGHT_PX - 3, ctx.canvas.width, 3)
-        ctx.fillStyle = "#000"
-        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+        const { size } = app.size.get()
+        const bg = getOrPut(assets.cached.bgs, `inside@${size.x},${size.y}`, () => canvas(
+          sizeAttr(size.x, size.y),
+          withCtx((ctx) => {
+            const SKY_HEIGHT_PX = 48
+            // wall
+            ctx.fillStyle = "hsl(32, 70%, 76%)"
+            ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+
+            // carpet
+            ctx.fillStyle = CARPET_COLOR
+            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+
+            // baseboard
+            ctx.fillStyle = "hsl(34, 68%, 32%)"
+            ctx.fillRect(0, SKY_HEIGHT_PX - 3, ctx.canvas.width, 3)
+
+            // seperator
+            ctx.fillStyle = "#000"
+            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+          }),
+        ))
+        ctx.drawImage(bg, 0, 0)
       },
 
       bgStore() {
-        const SKY_HEIGHT_PX = 48
-        ctx.fillStyle = "hsl(232, 70%, 56%)"
-        ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
-        ctx.fillStyle = "hsl(120, 70%, 60%)"
-        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
-        ctx.fillStyle = "#000"
-        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+        const { size } = app.size.get()
+        const bg = getOrPut(assets.cached.bgs, `store@${size.x},${size.y}`, () => canvas(
+          sizeAttr(size.x, size.y),
+          withCtx((ctx) => {
+            const SKY_HEIGHT_PX = 48
+            ctx.fillStyle = "hsl(232, 70%, 56%)"
+            ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+            ctx.fillStyle = "hsl(120, 70%, 60%)"
+            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+            ctx.fillStyle = "#000"
+            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+          }),
+        ))
+        ctx.drawImage(bg, 0, 0)
       },
 
       bgWork() {
-        const SKY_HEIGHT_PX = Math.floor(ctx.canvas.height / 2)
-        ctx.fillStyle = "hsl(30, 30%, 90%)"
-        ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
-        ctx.fillStyle = "hsl(30, 30%, 30%)"
-        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
-        ctx.fillStyle = "#000"
-        ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+        const { size } = app.size.get()
+        const bg = getOrPut(assets.cached.bgs, `work@${size.x},${size.y}`, () => canvas(
+          sizeAttr(size.x, size.y),
+          withCtx((ctx) => {
+            const SKY_HEIGHT_PX = Math.floor(ctx.canvas.height / 2)
+            ctx.fillStyle = "hsl(30, 30%, 90%)"
+            ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+            ctx.fillStyle = "hsl(30, 30%, 30%)"
+            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+            ctx.fillStyle = "#000"
+            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+          }),
+        ))
+        ctx.drawImage(bg, 0, 0)
       },
 
       cat(cat) {
-        const canvas = getOrPut(catCanvases, cat, () => CatCanvas(cat, assets.cat))
+        const canvas = getOrPut(assets.cached.cats, cat, () => CatCanvas(cat, assets.cat))
         ctx.save()
         ctx.translate(cat.pos.x, cat.pos.y)
         ctx.scale(cat.scale.x, cat.scale.y)

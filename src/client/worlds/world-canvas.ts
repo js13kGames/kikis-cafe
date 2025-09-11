@@ -23,50 +23,54 @@ export const
   WorldCanvas = (app: AppClient, assets: Assets, state: StateOutsideFM, world: WorldFM) => div(
     position("relative"),
     apd(
-      canvas($(app.size, ({ size: { x, y } }) => sizeAttr(x, y)), withDrawer(assets, (drawer) => {
-        const loop = Loop(() => {
-          drawer.track(() => {
-            drawer.bg()
-            world.cats.get().forEach((cat) => {
-              drawer.cat(cat)
+      canvas($(app.size, ({ size: { x, y } }) => sizeAttr(x, y)), withDrawer(
+        app,
+        assets,
+        (drawer) => {
+          const loop = Loop(() => {
+            drawer.track(() => {
+              drawer.bg()
+              world.cats.get().forEach((cat) => {
+                drawer.cat(cat)
+              })
             })
           })
-        })
-          .start()
+            .start()
 
-        onDestroy(() => {
-          loop.destroy()
-        })
+          onDestroy(() => {
+            loop.destroy()
+          })
 
-        state.state.listen((state) => {
-          drawer.focus(state.t === "focus" || state.t === "name" ? state.cat : undefined)
-        })
+          state.state.listen((state) => {
+            drawer.focus(state.t === "focus" || state.t === "name" ? state.cat : undefined)
+          })
 
-        onDestroy(onMousedown<HTMLCanvasElement>((el, _ev) => {
-          const _state = state.state.get()
-          if (_state.t !== "global") { return }
+          onDestroy(onMousedown<HTMLCanvasElement>((el, _ev) => {
+            const _state = state.state.get()
+            if (_state.t !== "global") { return }
 
-          const rect = el.getBoundingClientRect()
-          const pos = floor_(divide_(
-            V(_ev.clientX - rect.x, _ev.clientY - rect.y),
-            app.size.get().zoom,
-          ))
+            const rect = el.getBoundingClientRect()
+            const pos = floor_(divide_(
+              V(_ev.clientX - rect.x, _ev.clientY - rect.y),
+              app.size.get().zoom,
+            ))
 
-          const cat = world.cats.get().find((cat) =>
-            cat.pos.x - 6 < pos.x
-            && pos.x < cat.pos.x + 6
-            && cat.pos.y - 12 < pos.y
-            && pos.y < cat.pos.y + 2
-          )
-          if (cat != null) {
-            state.state.set(() => {
-              const state = ActiveStateFocusFM()
-              state.cat = cat
-              return state
-            })
-          }
-        })(drawer.ctx.canvas))
-      })),
+            const cat = world.cats.get().find((cat) =>
+              cat.pos.x - 6 < pos.x
+              && pos.x < cat.pos.x + 6
+              && cat.pos.y - 12 < pos.y
+              && pos.y < cat.pos.y + 2
+            )
+            if (cat != null) {
+              state.state.set(() => {
+                const state = ActiveStateFocusFM()
+                state.cat = cat
+                return state
+              })
+            }
+          })(drawer.ctx.canvas))
+        },
+      )),
 
       matchIf(state.state, (_state) =>
         _state.t === "global" ?

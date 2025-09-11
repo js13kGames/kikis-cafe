@@ -1,9 +1,11 @@
+import { CatFM } from "cats/form-models.gen"
 import { tab } from "rokay/data/array"
 
 import { TextCanvas } from "./elts/text-canvas"
 
 
 export type Assets = {
+  cached: { bgs: Map<string, HTMLCanvasElement>, cats: Map<CatFM, HTMLCanvasElement> }
   cat: HTMLImageElement
   font9: Map<string, HTMLCanvasElement>
   font12: Map<string, HTMLCanvasElement>
@@ -22,6 +24,10 @@ export const
       loadFont("italic 16px monospace", 6),
     ])
       .then(([cat, font9, font12, font16, font16italic]): Assets => ({
+        cached: {
+          bgs: new Map<string, HTMLCanvasElement>(),
+          cats: new Map<CatFM, HTMLCanvasElement>(),
+        },
         cat,
         font9,
         font12,

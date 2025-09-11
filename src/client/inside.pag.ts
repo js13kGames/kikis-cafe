@@ -16,7 +16,7 @@ export const
   InsidePage = (app: AppClient, assets: Assets, _state: StateInsideFM, world: WorldFM) => div(
     position("relative"),
     apd(
-      canvas($(app.size, ({ size: { x, y} }) => size(x, y)), withDrawer(assets, (drawer) => {
+      canvas($(app.size, ({ size: { x, y} }) => size(x, y)), withDrawer(app, assets, (drawer) => {
         const loop = Loop(() => {
           drawer.bgInside()
           world.catsInside.get().forEach((cat) => {

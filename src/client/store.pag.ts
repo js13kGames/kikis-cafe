@@ -13,7 +13,7 @@ import { withDrawer } from "./drawer"
 
 export const
   StorePage = (app: AppClient, assets: Assets) => div(position("relative"), apd(
-    canvas($(app.size, ({ size: { x, y} }) => size(x, y)), withDrawer(assets, (drawer) => {
+    canvas($(app.size, ({ size: { x, y} }) => size(x, y)), withDrawer(app, assets, (drawer) => {
       const loop = Loop(() => {
         drawer.bgStore()
       })
