@@ -38,6 +38,13 @@ const
 
 
 export const
+  outlineBox = (x: number, y: number, w: number, h: number, strokeWidth = 1) =>
+    (ctx: CanvasRenderingContext2D) => {
+      ctx.lineWidth = strokeWidth
+      ctx.fillRect(x + strokeWidth, y + strokeWidth, w - 2 * strokeWidth, h - 2 * strokeWidth)
+      ctx.strokeRect(x + strokeWidth / 2, y + strokeWidth / 2, w - strokeWidth, h - strokeWidth)
+    },
+
   withDrawer = (app: AppClient, assets: Assets, cb: (drawer: Drawer) => void) => withCtx((ctx) => {
     ctx.imageSmoothingEnabled = false
 
@@ -56,7 +63,7 @@ export const
           fill?: CanvasRenderingContext2D["fillStyle"]
           stroke?: CanvasRenderingContext2D["strokeStyle"]
           strokeWidth?: number
-        },
+        } = {},
       ) => {
         ctx.fillStyle = fill
         ctx.fillRect(x + strokeWidth, y + strokeWidth, w - 2 * strokeWidth, h - 2 * strokeWidth)
@@ -88,19 +95,7 @@ export const
                 })
               }
             }
-            /**
-             * ctx.fillStyle = "hsl(12, 70%, 56%)"
-             * ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
-             *
-             * // brick grout
-             * ctx.fillStyle = "#fff"
-             * for (let i = 0; i < SKY_HEIGHT_PX; i += 3) {
-             * ctx.fillRect(0, i, ctx.canvas.width, 1)
-             * for (let x = i % 2 ? 3 : 0; x < ctx.canvas.width; x += 6) {
-             * ctx.fillRect(x, i + 1, 1, 2)
-             * }
-             * }
-             **/
+
             // door
             ctx.save()
             ctx.fillStyle = "#999"
@@ -204,12 +199,35 @@ export const
           sizeAttr(size.x, size.y),
           withCtx((ctx) => {
             const SKY_HEIGHT_PX = Math.floor(ctx.canvas.height / 2)
-            ctx.fillStyle = "hsl(30, 30%, 90%)"
+            // wall
+            ctx.fillStyle = "hsl(56, 29%, 78%)"
             ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+
+            // desk
             ctx.fillStyle = "hsl(30, 30%, 30%)"
             ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+            ctx.fillStyle = "rgba(0, 0, 0, .25)"
+            for (let y = SKY_HEIGHT_PX + 2; y < ctx.canvas.height; y += 2) {
+              ctx.fillRect(0, y, ctx.canvas.width, 1)
+            }
+
+            // seperator line
             ctx.fillStyle = "#000"
             ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+
+            // keyboard
+            ctx.drawImage(
+              assets.keyboard,
+              Math.round(ctx.canvas.width / 2) - assets.keyboard.width,
+              SKY_HEIGHT_PX + 5,
+            )
+
+            // monitor
+            ctx.drawImage(
+              assets.monitor,
+              Math.round(ctx.canvas.width / 2) - assets.monitor.width / 2 + 30,
+              SKY_HEIGHT_PX - assets.monitor.height + 45,
+            )
           }),
         ))
         ctx.drawImage(bg, 0, 0)

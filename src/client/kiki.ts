@@ -84,7 +84,7 @@ mount(document.body, () => {
     app: AppClient = {
       router,
       size: derive(WindowSize(), (windowSize) => {
-        const zoom = 4
+        const zoom = windowSize.x < 640 || windowSize.y < 640 ? 3 : 4
         const size = floor_(divide(windowSize, zoom))
         size.y -= 2 * TOP_HEIGHT // top and bottom bars
         return {
@@ -152,7 +152,7 @@ mount(document.body, () => {
               const date = new Date(_time)
               return TextCanvas2(
                 date.toLocaleString(undefined, {
-                  year: "numeric",
+                  year: "2-digit",
                   month: "numeric",
                   day: "numeric",
                   hour: "numeric",
