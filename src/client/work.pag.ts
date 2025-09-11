@@ -10,7 +10,7 @@ import { bottom, display, justifyContent, position, width } from "rokay/browser/
 import { AppClient } from "./app"
 import { Assets } from "./assets"
 import { withDrawer } from "./drawer"
-import { TextCanvas } from "./elts/text-canvas"
+import { TextCanvas2 } from "./elts/text-canvas"
 import { WorldFM } from "./worlds/form-models.gen"
 
 
@@ -34,7 +34,7 @@ export const
         justifyContent("center"),
         position("absolute"),
         width("100%"),
-        apd(button(apd(TextCanvas("WORK", { font: "16px monospace" })), onClick(() => {
+        apd(button(apd(TextCanvas2("WORK", assets.font16)), onClick(() => {
           world.cash.set((_cash) => _cash + 5)
         }))),
       ),

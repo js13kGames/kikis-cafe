@@ -28,7 +28,7 @@ import { load } from "./assets.js"
 import { Base } from "./base.syn.js"
 import { CatFM } from "./cats/form-models.gen.js"
 import { Loader } from "./elts/loader.js"
-import { TextCanvas, TextCanvas2 } from "./elts/text-canvas.js"
+import { TextCanvas2 } from "./elts/text-canvas.js"
 import { InsidePage } from "./inside.pag.js"
 import { CAT_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
@@ -146,16 +146,19 @@ mount(document.body, () => {
           padding("4px 4px 3px"),
           $relative,
           width("100%"),
-          apd(match(worldFM.cash, (_cash) => TextCanvas(`$${_cash}`)), match(
+          apd(match(worldFM.cash, (_cash) => TextCanvas2(`$${_cash}`, assets.font9)), match(
             worldFM.time,
             (_time) => {
               const date = new Date(_time)
-              return TextCanvas(date.toLocaleString(undefined, {
-                year: "numeric",
-                month: "numeric",
-                day: "numeric",
-                hour: "numeric",
-              }))
+              return TextCanvas2(
+                date.toLocaleString(undefined, {
+                  year: "numeric",
+                  month: "numeric",
+                  day: "numeric",
+                  hour: "numeric",
+                }),
+                assets.font9,
+              )
             },
           )),
         ),

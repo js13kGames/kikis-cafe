@@ -12,10 +12,12 @@ export const
       fill = "#fff",
       font = "9px monospace",
       height = 16,
+      minWidth = 3,
     }: {
       fill?: string
       font?: string
       height?: number
+      minWidth?: number
     } = {},
   ) => {
     const txt = canvas(size(512, height), withCtx(
@@ -25,11 +27,11 @@ export const
       },
       canText(text, 0, Math.floor(height * 3 / 4)),
       solidify(80),
-      shrink({ max: V(-Infinity, height), min: V(Infinity, 0) }),
+      shrink({ max: V(minWidth, height), min: V(0, 0) }),
     ))
 
     return canvas(size(txt.width + 2, txt.height + 2), withCtx(
-      txt.width || txt.height ?
+      txt.width && txt.height ?
         image(txt, 0, 0, txt.width, txt.height, 1, 1, txt.width, txt.height)
       :
         () => {},

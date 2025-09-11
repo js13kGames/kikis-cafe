@@ -1,6 +1,5 @@
 import { onDestroy } from "#rokay/capture"
 import { apd } from "#rokay/core"
-import { TextCanvas } from "elts/text-canvas"
 import { size as sizeAttr, value } from "rokay/browser/attr"
 import { button, canvas, div, input } from "rokay/browser/elt"
 import { Loop } from "rokay/browser/game/loop"
@@ -16,6 +15,7 @@ import { ActiveStateGlobal } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
 import { Assets } from "../assets"
 import { withDrawer } from "../drawer"
+import { TextCanvas2 } from "../elts/text-canvas"
 import { ActiveStateFocusFM, ActiveStateNameFM, StateOutsideFM, WorldFM } from "../worlds/form-models.gen"
 
 
@@ -74,18 +74,21 @@ export const
         : _state.t === "focus" ?
           InnerHUD(apd(
             UpperHUD(apd(match(_state.cat.name, (_name) =>
-              TextCanvas(_name.trim() || "Unnamed Cat", { font: "italic 16px monospace" })
+              TextCanvas2(
+                _name.trim() || "Unnamed Cat",
+                _name.trim() ? assets.font16 : assets.font16italic,
+              )
             ))),
             LowerControls(apd(
-              button(apd(TextCanvas("Back", { font: "12px monospace" })), onClick(() => {
+              button(apd(TextCanvas2("Back", assets.font12)), onClick(() => {
                 state.state.set(() => ActiveStateGlobal())
               })),
-              button(apd(TextCanvas("Catch", { font: "12px monospace" })), onClick(() => {
+              button(apd(TextCanvas2("Catch", assets.font12)), onClick(() => {
                 world.cats.set((_cats) => _cats.filter((c) => c !== _state.cat))
                 world.catsInside.set((_cats) => _cats.concat(_state.cat))
                 state.state.set(() => ActiveStateGlobal())
               })),
-              button(apd(TextCanvas("Name", { font: "12px monospace" })), onClick(() => {
+              button(apd(TextCanvas2("Name", assets.font12)), onClick(() => {
                 state.state.set(() => {
                   const newState = ActiveStateNameFM()
                   newState.cat = _state.cat
@@ -97,12 +100,13 @@ export const
         :
           InnerHUD(apd(
             UpperHUD(apd(match(_state.cat.name, (_name) =>
-              TextCanvas(_name.trim() || "Unnamed Cat", {
-                font: `${_name ? "normal" : "italic"} 16px monospace`,
-              })
+              TextCanvas2(
+                _name.trim() || "Unnamed Cat",
+                _name.trim() ? assets.font16 : assets.font16italic,
+              )
             ))),
             LowerControls(apd(
-              button(apd(TextCanvas("Back", { font: "12px monospace" })), onClick(() => {
+              button(apd(TextCanvas2("Back", assets.font12)), onClick(() => {
                 state.state.set(() => ActiveStateGlobal())
               })),
               input(

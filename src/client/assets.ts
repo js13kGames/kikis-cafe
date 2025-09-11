@@ -17,9 +17,9 @@ export const
     Promise.all([
       loadImage("/art/cat.png"),
       loadFont("9px monospace"),
-      loadFont("12px monospace"),
-      loadFont("16px monospace"),
-      loadFont("italic 16px monospace"),
+      loadFont("12px monospace", 4),
+      loadFont("16px monospace", 6),
+      loadFont("italic 16px monospace", 6),
     ])
       .then(([cat, font9, font12, font16, font16italic]): Assets => ({
         cat,
@@ -31,16 +31,19 @@ export const
 
 
 const
-  loadFont = (font: string, fill = "#fff") =>
+  loadFont = (font: string, minWidth = 3, fill = "#fff") =>
     new Promise<Map<string, HTMLCanvasElement>>(
       (res) => {
-        res(
-          new Map<string, HTMLCanvasElement>(
-            tab(0x7f - 0x21, (i) => String.fromCharCode(0x21 + i)).map((letter) =>
-              [letter, TextCanvas(letter, { fill, font })]
-            ),
-          ),
-        )
+        res(new Map<string, HTMLCanvasElement>(
+          tab(0x7f - 0x20, (i) => String.fromCharCode(0x20 + i)).map((letter) => [
+            letter,
+            TextCanvas(letter, {
+              fill,
+              font,
+              minWidth,
+            }),
+          ]),
+        ))
       },
     ),
 
