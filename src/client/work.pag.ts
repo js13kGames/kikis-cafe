@@ -15,7 +15,7 @@ import { WorldFM } from "./worlds/form-models.gen"
 
 
 export const
-  WorkPage = (app: AppClient, assets: Assets, world: WorldFM) => div(
+  WorkPage = (app: AppClient, assets: Assets, world: WorldFM, step: (dt: number) => void) => div(
     position("relative"),
     apd(
       canvas($(app.size, ({ size: { x, y} }) => size(x, y)), withDrawer(app, assets, (drawer) => {
@@ -36,11 +36,7 @@ export const
         width("100%"),
         apd(button(apd(TextCanvas2("WORK", assets.font16)), onClick(() => {
           world.cash.set((_cash) => _cash + 20)
-          world.time.set((_time) => {
-            const next = new Date(_time)
-            next.setHours(next.getHours() + 1)
-            return next.toISOString()
-          })
+          step(60 * 60)
         }))),
       ),
     ),

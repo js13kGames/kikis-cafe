@@ -15,7 +15,6 @@ import { divide, floor_, len, minus, plus_, scale_, unit, unitOfAng, V, WV } fro
 import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
-import { Prop } from "rokay/prop/prop"
 import { matchOpt } from "rokay/route/router"
 
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
@@ -46,16 +45,19 @@ mount(document.body, () => {
       return v
     },
 
-    step = () => {
-      ticks.set(ticks.get() - 1)
+    step = (dt = 1) => {
+      for (let i = 0; i < dt; ++i) {
+        if (Math.random() < CAT_RATE) {
+          worldFM.cats.set((_cats) => _cats.concat(CatFM(RandomCat(app.size.get().bounds))))
+        }
+        worldFM.cats.get().forEach(stepCat)
+        worldFM.catsInside.get().forEach(stepCat)
+      }
       worldFM.time.set((_time) => {
         const next = new Date(_time)
-        next.setSeconds(next.getSeconds() + 1)
+        next.setSeconds(next.getSeconds() + dt)
         return next.toISOString()
       })
-      if (Math.random() < CAT_RATE) { world.cats.push(RandomCat(app.size.get().bounds)) }
-      worldFM.cats.get().forEach(stepCat)
-      worldFM.catsInside.get().forEach(stepCat)
     },
 
     stepCat = (cat: CatFM) => {
@@ -109,8 +111,7 @@ mount(document.body, () => {
       ],
       () => StateOutsideFM(),
     ),
-    ticks = Prop(0),
-    world = World(
+    worldFM = WorldFM(World(
       100,
       tab(10, () => RandomCat(app.size.get().bounds)),
       [],
@@ -118,8 +119,7 @@ mount(document.body, () => {
       {},
       {},
       new Date().toISOString(),
-    ),
-    worldFM = WorldFM(world),
+    )),
 
     loop = Loop(() => {
       step()
@@ -174,7 +174,7 @@ mount(document.body, () => {
           : state.t === "store" ?
             StorePage(app, assets, worldFM)
           :
-            WorkPage(app, assets, worldFM)
+            WorkPage(app, assets, worldFM, step)
         ),
 
         div(
