@@ -15,6 +15,7 @@ import { ActiveStateGlobal } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
 import { Assets } from "../assets"
 import { withDrawer } from "../drawer"
+import { matchInventory } from "../elts/inventory"
 import { TextCanvas2 } from "../elts/text-canvas"
 import { ActiveStateFocusFM, ActiveStateNameFM, StateOutsideFM, WorldFM } from "../worlds/form-models.gen"
 
@@ -74,7 +75,7 @@ export const
 
       matchIf(state.state, (_state) =>
         _state.t === "global" ?
-          null
+          InnerHUD(apd(UpperHUD(), LowerControls(apd(matchInventory(assets, world.items)))))
         : _state.t === "focus" ?
           InnerHUD(apd(
             UpperHUD(apd(match(_state.cat.name, (_name) =>

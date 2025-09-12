@@ -18,6 +18,27 @@ button {
 button:active {
   background-color: #c00;
 }
+button.inv {
+  background-color: hsl(113, 27%, 83%);
+  padding: 0;
+}
+button.inv:active {
+  background-color: hsl(113, 27%, 73%);
+}
+button.store {
+  background-color: hsl(137, 47%, 83%);
+  padding: 0;
+}
+button.store:active {
+  background-color: hsl(137, 47%, 73%);
+}
+button.store:disabled {
+  background-color: hsl(137, 16%, 42%);
+}
+button.store > canvas {
+  height: 48px;
+  width: 48px;
+}
 
 canvas, img {
   display: block;

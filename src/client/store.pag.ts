@@ -1,5 +1,4 @@
 import { apd, ApdArg } from "#rokay/core"
-import { TextCanvas2 } from "elts/text-canvas"
 import { disabled, size } from "rokay/browser/attr"
 import { button, canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
@@ -7,13 +6,16 @@ import { onClick } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
 import { alignItems, backgroundColor, flex, gap, left, overflow, padding, size as sizeStyle, top, width } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
-import { WorldFM } from "worlds/form-models.gen"
 
 import { Item, ItemFood, ItemLitter, ItemWaterBowl } from "../shared/items/types.gen"
 
 import { AppClient } from "./app"
 import { Assets } from "./assets"
+import { ItemCanvas } from "./elts/inventory"
+import { TextCanvas2 } from "./elts/text-canvas"
+import { $store } from "./style/kiki.gen"
 import { $absolute, $flexCol, $flexRow, $relative } from "./style/utils.gen"
+import { WorldFM } from "./worlds/form-models.gen"
 
 
 export const
@@ -25,6 +27,8 @@ export const
         gap("5px"),
         apd(
           button(
+            $store,
+
             apd(label),
             $(world.cash, (_cash) => disabled(_cash < cost)),
             flex("0 0 auto"),
@@ -87,14 +91,18 @@ export const
       // })),
       div($flexCol, apd(
         ItemShelf("Food", apd(
-          ItemButton("Food", 20, () => ItemFood()),
+          ItemButton(ItemCanvas(assets, ItemFood()), 20, () => ItemFood()),
           ItemButton("Good Food", 30, () => ItemFood()),
           ItemButton("Better Food", 40, () => ItemFood()),
           ItemButton("Best Food", 50, () => ItemFood()),
           ItemButton("Bestest Food", 60, () => ItemFood()),
         )),
-        ItemShelf("Devices", apd(ItemButton("Water Bowl", 200, () => ItemWaterBowl()))),
-        ItemShelf("Litter", apd(ItemButton("Litter", 30, () => ItemLitter()))),
+        ItemShelf("Devices", apd(ItemButton(ItemCanvas(assets, ItemWaterBowl()), 200, () =>
+          ItemWaterBowl()
+        ))),
+        ItemShelf("Litter", apd(
+          ItemButton(ItemCanvas(assets, ItemLitter()), 30, () => ItemLitter()),
+        )),
       ))),
     )
   }

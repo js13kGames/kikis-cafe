@@ -2,7 +2,7 @@ import { MixArgs } from "rokay/mix"
 import { async, charset, lang, size as sizeAttr, src } from "rokay/server/attr"
 import { apd, Elt } from "rokay/server/core"
 import { _meta, body, div, head, html, img, link, meta, script, title } from "rokay/server/elt"
-import { alignItems, display, justifyContent, size } from "rokay/server/style"
+import { alignItems, display, justifyContent, position, size } from "rokay/server/style"
 
 import { AppServer } from "./app.js"
 
@@ -32,7 +32,9 @@ export const
           alignItems("center"),
           display("flex"),
           justifyContent("center"),
-          apd(img(src("/art/icons/16.png"), sizeAttr(16), size("64px"))),
+          position("fixed"),
+          size("100%"),
+          apd(img(src("/art/icons/16.png"), sizeAttr(16), size("256px"))),
         )),
         ...args
       ),

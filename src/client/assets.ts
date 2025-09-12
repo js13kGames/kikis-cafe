@@ -16,6 +16,7 @@ export type Assets = {
   font12: Map<string, HTMLCanvasElement>
   font16: Map<string, HTMLCanvasElement>
   font16italic: Map<string, HTMLCanvasElement>
+  items: HTMLImageElement
   keyboard: HTMLCanvasElement
   monitor: HTMLCanvasElement
   person: HTMLCanvasElement
@@ -26,6 +27,7 @@ export const
   load = () =>
     Promise.all([
       loadImage("/art/cat.png"),
+      loadImage("/art/items.png"),
       loadFont("9px monospace"),
       loadFont("12px monospace", 4),
       loadFont("16px monospace", 6),
@@ -34,20 +36,23 @@ export const
       renderMonitor(),
       renderPerson(),
     ])
-      .then(([cat, font9, font12, font16, font16italic, keyboard, monitor, person]): Assets => ({
-        cached: {
-          bgs: new Map<string, HTMLCanvasElement>(),
-          cats: new Map<CatFM, HTMLCanvasElement>(),
-        },
-        cat,
-        font9,
-        font12,
-        font16,
-        font16italic,
-        keyboard,
-        monitor,
-        person,
-      }))
+      .then(
+        ([cat, items, font9, font12, font16, font16italic, keyboard, monitor, person]): Assets => ({
+          cached: {
+            bgs: new Map<string, HTMLCanvasElement>(),
+            cats: new Map<CatFM, HTMLCanvasElement>(),
+          },
+          cat,
+          font9,
+          font12,
+          font16,
+          font16italic,
+          items,
+          keyboard,
+          monitor,
+          person,
+        }),
+      )
 
 
 const
