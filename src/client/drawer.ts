@@ -90,7 +90,7 @@ export const
             for (let i = 0; i < SKY_HEIGHT_PX; i += 3) {
               for (let x = i % 2 ? -3 : 0; x < ctx.canvas.width; x += 6) {
                 outlineBox(ctx, x, i, 7, 4, {
-                  fill: pick([`hsl(12, 70%, ${pick(["51%", "56%", "61%", "66%"])})`]),
+                  fill: pick([`hsl(12, 70%, ${pick(["41%", "46%", "51%", "56%"])})`]),
                   stroke: "#fff",
                 })
               }
