@@ -25,7 +25,6 @@ export const
         const path = resolve(dir, id)
         const contents = parseBlogData(readFileSync(path).toString())
         const log = execSync(`git log -- ${path}`).toString()
-        console.log("log:", log)
         const commits = Array.from(log.matchAll(COMMIT_HEADER))
         const updated = commits.length ? new Date(commits[0][2]).toISOString() : undefined
         const created = commits.length ? new Date(last(commits)[2]).toISOString() : undefined
