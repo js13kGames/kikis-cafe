@@ -3,6 +3,9 @@ import { canvas } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
 import { getOrPut } from "rokay/data/map"
 import { pick } from "rokay/math/random"
+import { V, VZ } from "rokay/math/v"
+
+import { Item } from "../shared/items/types.gen"
 
 import { AppClient } from "./app"
 import { Assets } from "./assets"
@@ -20,6 +23,7 @@ export type Drawer = {
   cat(cat: CatFM): void
   clear(): void
   focus(cat: CatFM | undefined): void
+  item(item: Item, at?: V): void
   text(text: string): void
   track(cb: () => void): void
 }
@@ -195,11 +199,11 @@ export const
           withCtx((ctx) => {
             const SKY_HEIGHT_PX = Math.floor(ctx.canvas.height / 2)
             // wall
-            ctx.fillStyle = "hsl(56, 29%, 78%)"
+            ctx.fillStyle = "hsl(56, 9%, 58%)"
             ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
 
             // desk
-            ctx.fillStyle = "hsl(30, 30%, 30%)"
+            ctx.fillStyle = "hsl(30, 10%, 30%)"
             ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
             ctx.fillStyle = "rgba(0, 0, 0, .25)"
             for (let y = SKY_HEIGHT_PX + 2; y < ctx.canvas.height; y += 2) {
@@ -252,6 +256,27 @@ export const
           y.set(Math.floor(ctx.canvas.height / 2))
           zoom.set(1)
         }
+      },
+
+      item(item, at = VZ) {
+        ctx.drawImage(
+          assets.items,
+          (
+            item.t === "waterBowl" ?
+              0
+            : item.t === "food" ?
+              1
+            :
+              2
+          ) * 16,
+          0,
+          16,
+          16,
+          at.x,
+          at.y,
+          16,
+          16,
+        )
       },
 
       text(text: string, font: "font9" | "font12" | "font16" | "font16italic" = "font9") {

@@ -6,9 +6,10 @@ import { Loop } from "rokay/browser/game/loop"
 import { match, matchIf } from "rokay/browser/match"
 import { onClick, onInput, onKeydown, onMousedown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { bottom, display, flex, flexDirection, gap, justifyContent, minWidth, overflow, padding, position,
-  top, width } from "rokay/browser/style"
-import { divide_, floor_, V } from "rokay/math/v"
+import { bottom, display, flex, flexDirection, gap, justifyContent, minWidth, overflow, padding, pointerEvents,
+  position, top, width } from "rokay/browser/style"
+import { remove } from "rokay/data/array"
+import { divide_, floor_, scale_, V } from "rokay/math/v"
 import { MixArgs } from "rokay/mix"
 
 import { ActiveStateGlobal } from "../../shared/worlds/types.gen"
@@ -34,6 +35,11 @@ export const
               world.cats.get().forEach((cat) => {
                 drawer.cat(cat)
               })
+              Object.entries(world.itemsOutside.get()).forEach(([posString, item]) => {
+                const match = posString.match(/^(-?\d+),(-?\d+)$/)
+                if (match == null) { return }
+                drawer.item(item, scale_(V(parseInt(match[1], 10), parseInt(match[2], 10)), 16))
+              })
             })
           })
             .start()
@@ -48,26 +54,41 @@ export const
 
           onDestroy(onMousedown<HTMLCanvasElement>((el, _ev) => {
             const _state = state.state.get()
-            if (_state.t !== "global") { return }
+            console.log("state:", state.t)
+            if (_state.t === "global") {
+              const rect = el.getBoundingClientRect()
+              const pos = floor_(divide_(
+                V(_ev.clientX - rect.x, _ev.clientY - rect.y),
+                app.size.get().zoom,
+              ))
 
-            const rect = el.getBoundingClientRect()
-            const pos = floor_(divide_(
-              V(_ev.clientX - rect.x, _ev.clientY - rect.y),
-              app.size.get().zoom,
-            ))
-
-            const cat = world.cats.get().find((cat) =>
-              cat.pos.x - 6 < pos.x
-              && pos.x < cat.pos.x + 6
-              && cat.pos.y - 12 < pos.y
-              && pos.y < cat.pos.y + 2
-            )
-            if (cat != null) {
-              state.state.set(() => {
-                const state = ActiveStateFocusFM()
-                state.cat = cat
-                return state
-              })
+              const cat = world.cats.get().find((cat) =>
+                cat.pos.x - 6 < pos.x
+                && pos.x < cat.pos.x + 6
+                && cat.pos.y - 12 < pos.y
+                && pos.y < cat.pos.y + 2
+              )
+              if (cat != null) {
+                console.log("hello")
+                state.state.set(() => {
+                  const state = ActiveStateFocusFM()
+                  state.cat = cat
+                  return state
+                })
+              }
+            } else if (_state.t === "place") {
+              const rect = el.getBoundingClientRect()
+              const pos = floor_(divide_(
+                V(_ev.clientX - rect.x, _ev.clientY - rect.y),
+                app.size.get().zoom * 16,
+              ))
+              const item = world.itemsOutside.get()[`${pos.x},${pos.y}`]
+              if (item != null) { return }
+              world.itemsOutside.set(
+                (_items) => ({ ..._items, [`${pos.x},${pos.y}`]: _state.item }),
+              )
+              world.inventory.set((_items) => remove(_items, _state.item))
+              state.state.set(() => ActiveStateGlobal())
             }
           })(drawer.ctx.canvas))
         },
@@ -75,7 +96,10 @@ export const
 
       matchIf(state.state, (_state) =>
         _state.t === "global" ?
-          InnerHUD(apd(UpperHUD(), LowerControls(apd(matchInventory(assets, world.items)))))
+          InnerHUD(apd(
+            UpperHUD(),
+            LowerControls(apd(matchInventory(assets, state.state, world.inventory))),
+          ))
         : _state.t === "focus" ?
           InnerHUD(apd(
             UpperHUD(apd(match(_state.cat.name, (_name) =>
@@ -102,7 +126,7 @@ export const
               })),
             )),
           ))
-        :
+        : _state.t === "name" ?
           InnerHUD(apd(
             UpperHUD(apd(match(_state.cat.name, (_name) =>
               TextCanvas2(
@@ -134,6 +158,8 @@ export const
               ),
             )),
           ))
+        :
+          undefined
       ),
     ),
   )
@@ -145,6 +171,7 @@ const
     display("flex"),
     flexDirection("column"),
     justifyContent("space-between"),
+    pointerEvents("none"),
     position("absolute"),
     top("0"),
     width("100%"),
@@ -154,5 +181,12 @@ const
   UpperHUD = (...args: MixArgs<HTMLDivElement>) =>
     LowerControls(...args),
 
-  LowerControls = (...args: MixArgs<HTMLDivElement>) =>
-    div(display("flex"), gap("4px"), overflow("auto"), padding("4px"), width("100%"), ...args)
+  LowerControls = (...args: MixArgs<HTMLDivElement>) => div(
+    display("flex"),
+    gap("4px"),
+    overflow("auto"),
+    padding("4px"),
+    pointerEvents("initial"),
+    width("100%"),
+    ...args
+  )

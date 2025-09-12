@@ -115,6 +115,8 @@ mount(document.body, () => {
       tab(10, () => RandomCat(app.size.get().bounds)),
       [],
       [],
+      {},
+      {},
       new Date().toISOString(),
     ),
     worldFM = WorldFM(world),

@@ -36,7 +36,7 @@ export const
               const _cash = world.cash.get()
               if (_cash >= cost) {
                 world.cash.set((_cash) => _cash - cost)
-                world.items.set((_items) => _items.concat(item()))
+                world.inventory.set((_items) => _items.concat(item()))
               }
             }),
             sizeStyle("48px"),
