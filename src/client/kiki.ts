@@ -10,7 +10,7 @@ import { alignItems, flex, gap, justifyContent, overflow, padding, size, transfo
   width } from "rokay/browser/style"
 import { WindowSize } from "rokay/browser/window"
 import { tab } from "rokay/data/array"
-import { int, pick } from "rokay/math/random"
+import { float, int, pick } from "rokay/math/random"
 import { divide, floor_, len, minus, plus_, scale_, unit, unitOfAng, V, WV } from "rokay/math/v"
 import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
@@ -18,7 +18,7 @@ import { derive } from "rokay/prop/derive"
 import { matchOpt } from "rokay/route/router"
 
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
-import { CatStateSit, CatStateStand, CatStateWalk } from "../shared/cats/types.gen.js"
+import { CatStateSit, CatStateStand, CatStateSuspend, CatStateWalk } from "../shared/cats/types.gen.js"
 import { pgIndex, pgInside, pgStore, pgWork } from "../shared/pages.gen.js"
 import { ActiveStateGlobal, StateInside, StateOutside, StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
 
@@ -29,7 +29,7 @@ import { CatFM } from "./cats/form-models.gen.js"
 import { Loader } from "./elts/loader.js"
 import { TextCanvas2 } from "./elts/text-canvas.js"
 import { InsidePage } from "./inside.pag.js"
-import { CAT_RATE } from "./rates.js"
+import { CAT_RATE, SIT_RATE, SUSPEND_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
 import { $flexCol, $flexRow, $relative } from "./style/utils.gen.js"
 import { WorkPage } from "./work.pag.js"
@@ -45,27 +45,47 @@ mount(document.body, () => {
       return v
     },
 
+    spawnCat = () => {
+      const cat = CatFM(RandomCat(app.size.get().bounds))
+      cat.state = CatStateWalk(cat.pos)
+      const { size } = app.size.get()
+      cat.pos = V(cat.pos.x < size.x / 2 ? -10 : size.x + 10, cat.pos.y)
+      cat.scale.x = cat.pos.x < 0 ? 1 : -1
+      return cat
+    },
+
     step = (dt = 1) => {
       for (let i = 0; i < dt; ++i) {
-        if (Math.random() < CAT_RATE) {
-          worldFM.cats.set((_cats) => _cats.concat(CatFM(RandomCat(app.size.get().bounds))))
-        }
-        worldFM.cats.get().forEach(stepCat)
-        worldFM.catsInside.get().forEach(stepCat)
+        if (Math.random() < CAT_RATE) { world.cats.set((_cats) => _cats.concat(spawnCat())) }
+        world.cats.get().forEach((cat) => stepCat(cat, true))
+        world.catsInside.get().forEach((cat) => stepCat(cat, false))
       }
-      worldFM.time.set((_time) => {
+      world.time.set((_time) => {
         const next = new Date(_time)
         next.setSeconds(next.getSeconds() + dt)
         return next.toISOString()
       })
     },
 
-    stepCat = (cat: CatFM) => {
+    stepCat = (cat: CatFM, outside: boolean) => {
+      const { bounds } = app.size.get()
       if (cat.state.t === "sit" || cat.state.t === "stand") {
-        if (Math.random() < 1 / 360) {
-          cat.state = CatStateWalk(bound_(
-            plus_(scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)), cat.pos),
-            app.size.get().bounds,
+        if (Math.random() < SIT_RATE) {
+          let to = plus_(scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)), cat.pos)
+          if (outside) {
+            to.y = Math.max(bounds.min.y, to.y)
+          } else {
+            to = bound_(to, bounds)
+          }
+          cat.state = CatStateWalk(to)
+          cat.scale.x = cat.state.to.x < cat.pos.x ? -1 : 1
+        }
+      } else if (cat.state.t === "suspend") {
+        if (Math.random() < SUSPEND_RATE) {
+          const { bounds } = app.size.get()
+          cat.state = CatStateWalk(V(
+            float(bounds.min.x, bounds.max.x),
+            float(bounds.min.y, bounds.max.y),
           ))
           cat.scale.x = cat.state.to.x < cat.pos.x ? -1 : 1
         }
@@ -73,7 +93,21 @@ mount(document.body, () => {
         const diff = minus(cat.state.to, cat.pos)
         if (len(diff) < CAT_SPEED) {
           cat.pos = cat.state.to
-          cat.state = pick([CatStateSit(), CatStateStand()])
+          if (
+            outside
+            && (cat.pos.x < bounds.min.x || cat.pos.x > bounds.max.x || cat.pos.y > bounds.max.y)
+          ) {
+            cat.state = CatStateSuspend()
+            const _state = state.get()
+            if (_state.t === "outside") {
+              const _innerState = _state.state.get()
+              if (_innerState.t === "focus" && _innerState.cat === cat) {
+                _state.state.set(() => ActiveStateGlobal())
+              }
+            }
+          } else {
+            cat.state = pick([CatStateSit(), CatStateStand()])
+          }
         } else {
           cat.pos = plus_(scale_(unit(diff), CAT_SPEED), cat.pos)
         }
@@ -111,7 +145,7 @@ mount(document.body, () => {
       ],
       () => StateOutsideFM(),
     ),
-    worldFM = WorldFM(World(
+    world = WorldFM(World(
       100,
       tab(10, () => RandomCat(app.size.get().bounds)),
       [],
@@ -149,8 +183,8 @@ mount(document.body, () => {
           padding("4px 4px 3px"),
           $relative,
           width("100%"),
-          apd(match(worldFM.cash, (_cash) => TextCanvas2(`$${_cash}`, assets.font9)), match(
-            worldFM.time,
+          apd(match(world.cash, (_cash) => TextCanvas2(`$${_cash}`, assets.font9)), match(
+            world.time,
             (_time) => {
               const date = new Date(_time)
               return TextCanvas2(
@@ -168,13 +202,13 @@ mount(document.body, () => {
 
         match(state, (state) =>
           state.t === "inside" ?
-            InsidePage(app, assets, state, worldFM)
+            InsidePage(app, assets, state, world)
           : state.t === "outside" ?
-            WorldCanvas(app, assets, state, worldFM)
+            WorldCanvas(app, assets, state, world)
           : state.t === "store" ?
-            StorePage(app, assets, worldFM)
+            StorePage(app, assets, world)
           :
-            WorkPage(app, assets, worldFM, step)
+            WorkPage(app, assets, world, step)
         ),
 
         div(

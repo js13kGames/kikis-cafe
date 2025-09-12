@@ -33,7 +33,7 @@ export const
             drawer.track(() => {
               drawer.bg()
               world.cats.get().forEach((cat) => {
-                drawer.cat(cat)
+                if (cat.state.t !== "suspend") { drawer.cat(cat) }
               })
               Object.entries(world.itemsOutside.get()).forEach(([posString, item]) => {
                 const match = posString.match(/^(-?\d+),(-?\d+)$/)
@@ -54,7 +54,6 @@ export const
 
           onDestroy(onMousedown<HTMLCanvasElement>((el, _ev) => {
             const _state = state.state.get()
-            console.log("state:", state.t)
             if (_state.t === "global") {
               const rect = el.getBoundingClientRect()
               const pos = floor_(divide_(
@@ -69,7 +68,6 @@ export const
                 && pos.y < cat.pos.y + 2
               )
               if (cat != null) {
-                console.log("hello")
                 state.state.set(() => {
                   const state = ActiveStateFocusFM()
                   state.cat = cat

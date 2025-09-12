@@ -11,11 +11,10 @@ export const
     play: {},
     sit: {},
     splay: {},
+    suspend: {},
     stand: {},
     stretch: {},
-    walk: {
-      to: V
-    },
+    walk: { to: V },
   }),
 
   Cat = TypeObject({

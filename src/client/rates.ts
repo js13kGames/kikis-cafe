@@ -1,4 +1,8 @@
 export const
+  PER_SECOND_RATE = (sec: number) =>
+    1 / sec / FPS,
   FPS = 60,
   SECONDS_PER_CAT = 20,
-  CAT_RATE = 1 / SECONDS_PER_CAT / FPS
+  CAT_RATE = PER_SECOND_RATE(20),
+  SIT_RATE = PER_SECOND_RATE(10),
+  SUSPEND_RATE = PER_SECOND_RATE(600)
