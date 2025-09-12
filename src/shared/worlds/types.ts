@@ -1,6 +1,7 @@
 import { TypeADT, TypeArray, TypeInt, TypeObject, TypeProp, TypeString } from "rokay/route/type"
 
 import { Cat } from "../cats/types"
+import { Item } from "../items/types"
 
 
 export const
@@ -21,5 +22,6 @@ export const
     cash: TypeProp(TypeInt(), { editable: true }),
     cats: TypeProp(TypeArray(Cat), { editable: true }),
     catsInside: TypeProp(TypeArray(Cat), { editable: true }),
+    items: TypeProp(TypeArray(Item), { editable: true }),
     time: TypeProp(TypeString(), { editable: true }),
   })

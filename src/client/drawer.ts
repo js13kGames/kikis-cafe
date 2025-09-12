@@ -181,13 +181,8 @@ export const
         const bg = getOrPut(assets.cached.bgs, `store@${size.x},${size.y}`, () => canvas(
           sizeAttr(size.x, size.y),
           withCtx((ctx) => {
-            const SKY_HEIGHT_PX = 48
-            ctx.fillStyle = "hsl(232, 70%, 56%)"
-            ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
-            ctx.fillStyle = "hsl(120, 70%, 60%)"
-            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
-            ctx.fillStyle = "#000"
-            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+            ctx.fillStyle = "hsl(3, 26%, 30%)"
+            ctx.fillRect(0, 0, size.x, size.y)
           }),
         ))
         ctx.drawImage(bg, 0, 0)

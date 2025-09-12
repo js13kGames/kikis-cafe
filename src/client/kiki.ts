@@ -114,6 +114,7 @@ mount(document.body, () => {
       100,
       tab(10, () => RandomCat(app.size.get().bounds)),
       [],
+      [],
       new Date().toISOString(),
     ),
     worldFM = WorldFM(world),
@@ -132,7 +133,7 @@ mount(document.body, () => {
       $flexCol,
       $relative,
       $(app.size, ({ size: { x, y }, zoom }) => mix(
-        size(x + "px", y + "px"),
+        size(x + "px", (y + 2 * TOP_HEIGHT) + "px"),
         transform(`scale(${zoom})`),
       )),
       transformOrigin("top left"),
@@ -169,7 +170,7 @@ mount(document.body, () => {
           : state.t === "outside" ?
             WorldCanvas(app, assets, state, worldFM)
           : state.t === "store" ?
-            StorePage(app, assets)
+            StorePage(app, assets, worldFM)
           :
             WorkPage(app, assets, worldFM)
         ),
