@@ -30,7 +30,7 @@ export const
             flex("0 0 auto"),
             onClick(() => {
               const _cash = world.cash.get()
-              if (_cash > cost) {
+              if (_cash >= cost) {
                 world.cash.set((_cash) => _cash - cost)
                 world.items.set((_items) => _items.concat(item()))
               }
