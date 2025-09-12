@@ -2,6 +2,7 @@ import { onDestroy } from "#rokay/capture"
 import { apd } from "rokay/browser/core"
 import { a, div } from "rokay/browser/elt"
 import { Loop } from "rokay/browser/game/loop"
+import { LocalStore } from "rokay/browser/local-storage"
 import { match } from "rokay/browser/match"
 import { mount } from "rokay/browser/mount"
 import { $ } from "rokay/browser/prop"
@@ -33,7 +34,7 @@ import { CAT_RATE, SIT_RATE, SUSPEND_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
 import { $flexCol, $flexRow, $relative } from "./style/utils.gen.js"
 import { WorkPage } from "./work.pag.js"
-import { StateFM, StateInsideFM, StateOutsideFM, WorldFM } from "./worlds/form-models.gen.js"
+import { StateFM, StateInsideFM, StateOutsideFM, toWorld, WorldFM } from "./worlds/form-models.gen.js"
 import { WorldCanvas } from "./worlds/world-canvas.js"
 
 
@@ -145,7 +146,7 @@ mount(document.body, () => {
       ],
       () => StateOutsideFM(),
     ),
-    world = WorldFM(World(
+    worldLS = LocalStore("world", () => World(
       100,
       tab(10, () => RandomCat(app.size.get().bounds)),
       [],
@@ -154,9 +155,11 @@ mount(document.body, () => {
       {},
       new Date().toISOString(),
     )),
+    world = WorldFM(worldLS.get()),
 
     loop = Loop(() => {
       step()
+      worldLS.set(toWorld(world))
     })
       .start()
 
