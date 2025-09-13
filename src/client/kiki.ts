@@ -36,7 +36,7 @@ import { InsidePage } from "./inside.pag.js"
 import { StorePage } from "./store.pag.js"
 import { $flexCol, $flexRow, $relative, $w100 } from "./style/utils.gen.js"
 import { WorkPage } from "./work.pag.js"
-import { StateFM, StateInsideFM, StateOutsideFM, toWorld, WorldFM } from "./worlds/form-models.gen.js"
+import { StateFM, StateInsideFM, StateOutsideFM, StateWorkFM, toWorld, WorldFM } from "./worlds/form-models.gen.js"
 import { WorldCanvas } from "./worlds/world-canvas.js"
 
 
@@ -83,6 +83,10 @@ mount(document.body, () => {
         next.setSeconds(next.getSeconds() + dt)
         return next.toISOString()
       })
+      const _state = state.get()
+      if (_state.t === "work" && _state.smash.get() > 0) {
+        _state.smash.set((_smash) => _smash - 1)
+      }
     },
 
     stepCat = (cat: CatFM, outside: boolean, items: Record<string, Item>) => {
@@ -211,7 +215,7 @@ mount(document.body, () => {
       [
         matchOpt(/^\/?$/, ([_]) => StateOutsideFM(StateOutside(ActiveStateGlobal()))),
         matchOpt(/^\/inside\/?$/, () => StateInsideFM(StateInside(ActiveStateGlobal()))),
-        matchOpt(/^\/work\/?$/, () => StateWork()),
+        matchOpt(/^\/work\/?$/, () => StateWorkFM(StateWork(0))),
         matchOpt(/^\/store\/?$/, () => StateStore()),
       ],
       () => StateOutsideFM(),
@@ -284,7 +288,7 @@ mount(document.body, () => {
           : state.t === "store" ?
             StorePage(app, assets, world)
           :
-            WorkPage(app, assets, world, step)
+            WorkPage(app, assets, state, world, step)
         ),
 
         div(

@@ -18,6 +18,9 @@ button {
 button:active {
   background-color: #c00;
 }
+button:disabled {
+  background-color: hsl(137, 16%, 42%);
+}
 button.inv {
   background-color: hsl(113, 27%, 83%);
   padding: 0;

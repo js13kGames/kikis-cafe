@@ -1,6 +1,9 @@
 export const
   FPS = 60,
 
+  secondsInTicks = (seconds: number) =>
+    seconds * FPS,
+
   ticksInDays = (days: number) =>
     days * 24 * 60 * FPS,
 

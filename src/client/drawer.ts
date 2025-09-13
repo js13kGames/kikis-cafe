@@ -18,7 +18,7 @@ export type Drawer = {
   bg(): void
   bgInside(): void
   bgStore(): void
-  bgWork(): void
+  bgWork(inSmash: boolean): void
   cat(cat: CatFM): void
   clear(): void
   focus(cat: CatFM | undefined): void
@@ -199,18 +199,16 @@ export const
         ctx.drawImage(bg, 0, 0)
       },
 
-      bgWork() {
+      bgWork(inSmash) {
         const { size } = app.size.get()
+
+        const zoom = Math.min(Math.floor(ctx.canvas.width / 16), Math.floor(ctx.canvas.height / 10))
+        const SKY_HEIGHT = ctx.canvas.height / 2 + 2 * zoom
+
         const bg = getOrPut(assets.cached.bgs, `work@${size.x},${size.y}`, () => canvas(
           sizeAttr(size.x, size.y),
           withCtx((ctx) => {
             ctx.imageSmoothingEnabled = false
-
-            const zoom = Math.min(
-              Math.floor(ctx.canvas.width / 16),
-              Math.floor(ctx.canvas.height / 10),
-            )
-            const SKY_HEIGHT = ctx.canvas.height / 2 + 2 * zoom
 
             // wall
             ctx.fillStyle = "hsl(56, 9%, 58%)"
@@ -219,18 +217,6 @@ export const
             // desk
             ctx.fillStyle = "hsl(30, 10%, 30%)"
             ctx.fillRect(0, SKY_HEIGHT, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT)
-            // person
-            ctx.drawImage(
-              assets.work,
-              0,
-              0,
-              16,
-              10,
-              ctx.canvas.width / 2 - 8 * zoom,
-              ctx.canvas.height / 2 - 5 * zoom,
-              16 * zoom,
-              10 * zoom,
-            )
             // const SKY_HEIGHT_PX = Math.floor(ctx.canvas.height / 2)
             // // wall
             // ctx.fillStyle = "hsl(56, 9%, 58%)"
@@ -260,6 +246,18 @@ export const
           }),
         ))
         ctx.drawImage(bg, 0, 0)
+        // person
+        ctx.drawImage(
+          assets.work,
+          inSmash ? 16 : 0,
+          0,
+          16,
+          10,
+          ctx.canvas.width / 2 - 8 * zoom,
+          ctx.canvas.height / 2 - 5 * zoom,
+          16 * zoom,
+          10 * zoom,
+        )
       },
 
       cat(cat) {

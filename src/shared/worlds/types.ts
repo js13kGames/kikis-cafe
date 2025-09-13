@@ -15,7 +15,7 @@ export const
   State = TypeADT({
     "outside": { state: TypeProp(ActiveState, { editable: true }) },
     "inside": { state: TypeProp(ActiveState, { editable: true }) },
-    "work": {},
+    "work": { smash: TypeProp(TypeInt(), { editable: true }) },
     "store": {},
   }),
 
