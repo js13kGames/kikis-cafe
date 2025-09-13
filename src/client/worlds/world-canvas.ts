@@ -8,7 +8,7 @@ import { onClick, onInput, onKeydown, onMousedown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
 import { alignItems, bottom, flex, gap, justifyContent, minWidth, overflow, padding, pointerEvents, top } from "rokay/browser/style"
 import { remove } from "rokay/data/array"
-import { divide_, floor_, V } from "rokay/math/v"
+import { divide_, floor_, len, minus_, V } from "rokay/math/v"
 import { MixArgs } from "rokay/mix"
 import { derive } from "rokay/prop/derive"
 import { PropForm } from "rokay/prop/form"
@@ -35,6 +35,7 @@ export const
     items: PropForm<Record<string, Item>>,
     state: PropForm<ActiveStateFM>,
     world: WorldFM,
+    { scatter }: { scatter(cat: CatFM): void },
   ) =>
     div($relative, apd(
       canvas($(app.size, ({ size: { x, y } }) => sizeAttr(x, y)), withDrawer(
@@ -126,15 +127,25 @@ export const
               button(apd(TextCanvas2("Back", assets.font12)), onClick(() => {
                 state.set(() => ActiveStateGlobal())
               })),
-              match(_state.cat.state, (_catState) =>
-                _catState.t !== "dead" && canCatch ?
-                  button(apd(TextCanvas2("Catch", assets.font12)), onClick(() => {
-                    world.cats.set((_cats) => remove(_cats, _state.cat))
-                    world.catsInside.set((_cats) => _cats.concat(_state.cat))
-                    state.set(() => ActiveStateGlobal())
-                  }))
-                :
-                  undefined
+              match(
+                _state.cat.state,
+                (_catState) =>
+                  _catState.t !== "dead"
+                  && (_catState.t !== "walk" || !_catState.scatter)
+                  && canCatch ?
+                    button(apd(TextCanvas2("Catch", assets.font12)), onClick(() => {
+                      const dist = len(minus_(V(app.size.get().size.x / 2, 48), _state.cat.pos))
+                      console.log("dist:", dist, 10 / dist)
+                      if (Math.random() < 10 / dist) {
+                        world.cats.set((_cats) => remove(_cats, _state.cat))
+                        world.catsInside.set((_cats) => _cats.concat(_state.cat))
+                        state.set(() => ActiveStateGlobal())
+                      } else {
+                        scatter(_state.cat)
+                      }
+                    }))
+                  :
+                    undefined,
               ),
               match(_state.cat.state, (_catState) =>
                 _catState.t !== "dead" ?

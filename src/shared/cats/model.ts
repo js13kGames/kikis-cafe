@@ -12,6 +12,7 @@ export const
   CAT_COATS = [...DARK_CAT_COATS, ...LIGHT_CAT_COATS],
   CAT_EYES = ["#ff0", "#0f0", "#00f", "#000"],
   CAT_SPEED = 10 / 60,
+  SCATTER_SPEED = 30 / 60,
 
   RandomCat = ({ min, max }: { min: V, max: V }) => {
     const pos = V(int(min.x, max.x), int(min.y, max.y))

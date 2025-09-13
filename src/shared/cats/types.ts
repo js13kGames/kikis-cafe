@@ -11,7 +11,7 @@ export const
     sit: {},
     suspend: {},
     stand: {},
-    walk: { to: V },
+    walk: { scatter: TypeProp(TypeBoolean(), { optional: true }), to: V },
   }),
 
   Cattrs = TypeObject({
