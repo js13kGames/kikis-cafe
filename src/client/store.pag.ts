@@ -2,10 +2,13 @@ import { apd, ApdArg } from "#rokay/core"
 import { disabled, size } from "rokay/browser/attr"
 import { button, canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
+import { matchIf } from "rokay/browser/match"
 import { onClick } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { alignItems, backgroundColor, flex, gap, left, overflow, padding, size as sizeStyle, top } from "rokay/browser/style"
+import { alignItems, backgroundColor, flex, gap, justifyContent, left, overflow, padding, size as sizeStyle,
+  top } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
+import { derive } from "rokay/prop/derive"
 
 import { Item, ItemFood, ItemLitter, ItemWaterBowl } from "../shared/items/types.gen"
 
@@ -73,36 +76,45 @@ export const
           ),
           div($absolute, left("4px"), top("4px"), apd(TextCanvas2(label, assets.font9))),
         ),
-      )
+      ),
+      closed = derive(world.time, (_time) => {
+        const date = new Date(_time)
+        return date.getHours() < 8 || date.getHours() > 22
+      })
 
     return div(
       backgroundColor("hsl(3, 26%, 10%)"),
-      overflow("auto"),
+      overflow("hidden"),
       $relative,
       $(app.size, ({ size: { x, y } }) => sizeStyle(x + "px", y + "px")),
-      apd(// canvas($(app.size, ({ size: { x, y} }) => size(x, y)), withDrawer(app, assets, (drawer) => {
-      //   const loop = Loop(() => {
-      //     drawer.bgStore()
-      //   })
-      //     .start()
-      //   onDestroy(() => {
-      //     loop.destroy()
-      //   })
-      // })),
-      div($flexCol, apd(
-        ItemShelf("Food", apd(
-          ItemButton(ItemCanvas(assets, ItemFood()), 20, () => ItemFood()),
-          ItemButton("Good Food", 30, () => ItemFood()),
-          ItemButton("Better Food", 40, () => ItemFood()),
-          ItemButton("Best Food", 50, () => ItemFood()),
-          ItemButton("Bestest Food", 60, () => ItemFood()),
+      apd(
+        div($flexCol, sizeStyle("100%"), overflow("auto"), apd(
+          ItemShelf("Food", apd(
+            ItemButton(ItemCanvas(assets, ItemFood()), 20, () => ItemFood()),
+            ItemButton("Good Food", 30, () => ItemFood()),
+            ItemButton("Better Food", 40, () => ItemFood()),
+            ItemButton("Best Food", 50, () => ItemFood()),
+            ItemButton("Bestest Food", 60, () => ItemFood()),
+          )),
+          ItemShelf("Devices", apd(ItemButton(ItemCanvas(assets, ItemWaterBowl()), 200, () =>
+            ItemWaterBowl()
+          ))),
+          ItemShelf("Litter", apd(ItemButton(ItemCanvas(assets, ItemLitter()), 30, () =>
+            ItemLitter()
+          ))),
         )),
-        ItemShelf("Devices", apd(ItemButton(ItemCanvas(assets, ItemWaterBowl()), 200, () =>
-          ItemWaterBowl()
-        ))),
-        ItemShelf("Litter", apd(
-          ItemButton(ItemCanvas(assets, ItemLitter()), 30, () => ItemLitter()),
+        matchIf(closed, () => div(
+          $absolute,
+          alignItems("center"),
+          backgroundColor("rgba(0,0,0,.25)"),
+          $flexCol,
+          gap("8px"),
+          justifyContent("center"),
+          left(0),
+          sizeStyle("100%"),
+          top(0),
+          apd(TextCanvas2("Store Hours:", assets.font12), TextCanvas2("8AM - 10PM", assets.font12)),
         )),
-      ))),
+      ),
     )
   }
