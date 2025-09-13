@@ -78,7 +78,7 @@ mount(document.body, () => {
           // only kill it if it's on screen
           world.cats.set((_cats) => remove(_cats, cat))
         } else {
-          cat.state.set(() => CatStateDead(cat.attrs.hunger <= 0 ? "Starved" : "Dehydration"))
+          cat.state.set(() => CatStateDead(cat.attrs.hunger <= 0 ? "Hunger" : "Thirst"))
         }
         return
       }

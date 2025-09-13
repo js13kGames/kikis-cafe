@@ -119,8 +119,9 @@ export const
                 _name.trim() || "Unnamed Cat",
                 _name.trim() ? assets.font16 : assets.font16italic,
               )),
-              matchIf(derive(_state.cat.state, (_state) => _state.t === "dead"), (_state) =>
-                TextCanvas2("(Deceased)", assets.font12)
+              matchIf(
+                derive(_state.cat.state, (_state) => _state.t === "dead" ? _state : undefined),
+                (_state) => TextCanvas2(`(Deceased: ${_state.reason})`, assets.font12),
               ),
             )),
             LowerControls(apd(
@@ -167,8 +168,9 @@ export const
                 _name.trim() || "Unnamed Cat",
                 _name.trim() ? assets.font16 : assets.font16italic,
               )),
-              matchIf(derive(_state.cat.state, (_state) => _state.t === "dead"), (_state) =>
-                TextCanvas2("(Deceased)", assets.font12)
+              matchIf(
+                derive(_state.cat.state, (_state) => _state.t === "dead" ? _state : undefined),
+                (_state) => TextCanvas2(`(Deceased: ${_state.reason})`, assets.font12),
               ),
             )),
             LowerControls(apd(
