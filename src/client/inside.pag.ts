@@ -1,8 +1,7 @@
-import { WorldCanvas } from "worlds/world-canvas"
-
 import { AppClient } from "./app"
 import { Assets } from "./assets"
 import { StateInsideFM, WorldFM } from "./worlds/form-models.gen"
+import { WorldCanvas } from "./worlds/world-canvas"
 
 
 export const

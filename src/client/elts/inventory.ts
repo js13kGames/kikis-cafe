@@ -10,11 +10,11 @@ import { derive } from "rokay/prop/derive"
 import { PropForm } from "rokay/prop/form"
 import { $inv } from "style/kiki.gen"
 import { $flexRow } from "style/utils.gen"
-import { ActiveStateFM } from "worlds/form-models.gen"
 
 import { Item } from "../../shared/items/types.gen"
 import { ActiveStatePlace } from "../../shared/worlds/types.gen"
 import { Assets } from "../assets"
+import { ActiveStateFM } from "../worlds/form-models.gen"
 
 
 export const

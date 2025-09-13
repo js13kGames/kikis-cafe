@@ -11,7 +11,6 @@ import { AppClient } from "./app"
 import { Assets } from "./assets"
 import { CatCanvas } from "./cats/cat-canvas"
 import { CatFM } from "./cats/form-models.gen"
-import { TextCanvas } from "./elts/text-canvas"
 
 
 export type Drawer = {
@@ -24,7 +23,6 @@ export type Drawer = {
   clear(): void
   focus(cat: CatFM | undefined): void
   item(item: Item, at?: V): void
-  text(text: string): void
   track(cb: () => void): void
 }
 
@@ -206,36 +204,59 @@ export const
         const bg = getOrPut(assets.cached.bgs, `work@${size.x},${size.y}`, () => canvas(
           sizeAttr(size.x, size.y),
           withCtx((ctx) => {
-            const SKY_HEIGHT_PX = Math.floor(ctx.canvas.height / 2)
+            ctx.imageSmoothingEnabled = false
+
+            const zoom = Math.min(
+              Math.floor(ctx.canvas.width / 16),
+              Math.floor(ctx.canvas.height / 10),
+            )
+            const SKY_HEIGHT = ctx.canvas.height / 2 + 2 * zoom
+
             // wall
             ctx.fillStyle = "hsl(56, 9%, 58%)"
-            ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+            ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT)
 
             // desk
             ctx.fillStyle = "hsl(30, 10%, 30%)"
-            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
-            ctx.fillStyle = "rgba(0, 0, 0, .25)"
-            for (let y = SKY_HEIGHT_PX + 2; y < ctx.canvas.height; y += 2) {
-              ctx.fillRect(0, y, ctx.canvas.width, 1)
-            }
-
-            // seperator line
-            ctx.fillStyle = "#000"
-            ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
-
-            // keyboard
+            ctx.fillRect(0, SKY_HEIGHT, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT)
+            // person
             ctx.drawImage(
-              assets.keyboard,
-              Math.round(ctx.canvas.width / 2) - assets.keyboard.width,
-              SKY_HEIGHT_PX + 5,
+              assets.work,
+              0,
+              0,
+              16,
+              10,
+              ctx.canvas.width / 2 - 8 * zoom,
+              ctx.canvas.height / 2 - 5 * zoom,
+              16 * zoom,
+              10 * zoom,
             )
-
-            // monitor
-            ctx.drawImage(
-              assets.monitor,
-              Math.round(ctx.canvas.width / 2) - assets.monitor.width / 2 + 30,
-              SKY_HEIGHT_PX - assets.monitor.height + 45,
-            )
+            // const SKY_HEIGHT_PX = Math.floor(ctx.canvas.height / 2)
+            // // wall
+            // ctx.fillStyle = "hsl(56, 9%, 58%)"
+            // ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+            // // desk
+            // ctx.fillStyle = "hsl(30, 10%, 30%)"
+            // ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+            // ctx.fillStyle = "rgba(0, 0, 0, .25)"
+            // for (let y = SKY_HEIGHT_PX + 2; y < ctx.canvas.height; y += 2) {
+            //   ctx.fillRect(0, y, ctx.canvas.width, 1)
+            // }
+            // // seperator line
+            // ctx.fillStyle = "#000"
+            // ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, 1)
+            // // keyboard
+            // ctx.drawImage(
+            //   assets.keyboard,
+            //   Math.round(ctx.canvas.width / 2) - assets.keyboard.width,
+            //   SKY_HEIGHT_PX + 5,
+            // )
+            // // monitor
+            // ctx.drawImage(
+            //   assets.monitor,
+            //   Math.round(ctx.canvas.width / 2) - assets.monitor.width / 2 + 30,
+            //   SKY_HEIGHT_PX - assets.monitor.height + 45,
+            // )
           }),
         ))
         ctx.drawImage(bg, 0, 0)
@@ -297,17 +318,6 @@ export const
           16,
           16,
         )
-      },
-
-      text(text: string, font: "font9" | "font12" | "font16" | "font16italic" = "font9") {
-        ctx.save()
-        const letters = text.split("")
-        letters.forEach((letter) => {
-          const l = getOrPut(assets[font], letter, () => TextCanvas(letter))
-          ctx.drawImage(l, 0, 0)
-          ctx.translate(l.width, 0)
-        })
-        ctx.restore()
       },
 
       track(cb: () => void) {

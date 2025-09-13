@@ -7,8 +7,7 @@ import { match } from "rokay/browser/match"
 import { mount } from "rokay/browser/mount"
 import { $ } from "rokay/browser/prop"
 import { BrowserRouter } from "rokay/browser/router"
-import { alignItems, flex, gap, justifyContent, overflow, padding, size, transform, transformOrigin,
-  width } from "rokay/browser/style"
+import { alignItems, flex, gap, justifyContent, overflow, padding, size, transform, transformOrigin } from "rokay/browser/style"
 import { WindowSize } from "rokay/browser/window"
 import { remove, tab } from "rokay/data/array"
 import { float, int, pick } from "rokay/math/random"
@@ -17,7 +16,6 @@ import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
 import { matchOpt } from "rokay/route/router"
-import { WorldCanvas } from "worlds/world-canvas.js"
 
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
 import { CatStateDead, CatStateDrink, CatStateEat, CatStateSit, CatStateStand, CatStateSuspend, CatStateWalk } from "../shared/cats/types.gen.js"
@@ -36,9 +34,10 @@ import { Loader } from "./elts/loader.js"
 import { TextCanvas2 } from "./elts/text-canvas.js"
 import { InsidePage } from "./inside.pag.js"
 import { StorePage } from "./store.pag.js"
-import { $flexCol, $flexRow, $relative } from "./style/utils.gen.js"
+import { $flexCol, $flexRow, $relative, $w100 } from "./style/utils.gen.js"
 import { WorkPage } from "./work.pag.js"
 import { StateFM, StateInsideFM, StateOutsideFM, toWorld, WorldFM } from "./worlds/form-models.gen.js"
+import { WorldCanvas } from "./worlds/world-canvas.js"
 
 
 mount(document.body, () => {
@@ -259,7 +258,7 @@ mount(document.body, () => {
           overflow("auto"),
           padding("4px 4px 3px"),
           $relative,
-          width("100%"),
+          $w100,
           apd(match(world.cash, (_cash) => TextCanvas2(`$${_cash}`, assets.font9)), match(
             world.time,
             (_time) => {
@@ -295,7 +294,7 @@ mount(document.body, () => {
           justifyContent("space-between"),
           overflow("auto"),
           padding("4px"),
-          width("100%"),
+          $w100,
           apd(
             a(app.router.href(pgIndex()), apd(TextCanvas2("Outside", assets.font9))),
             a(app.router.href(pgInside()), apd(TextCanvas2("Inside", assets.font9))),

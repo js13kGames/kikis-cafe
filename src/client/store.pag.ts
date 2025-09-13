@@ -4,7 +4,7 @@ import { button, canvas, div } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
 import { onClick } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { alignItems, backgroundColor, flex, gap, left, overflow, padding, size as sizeStyle, top, width } from "rokay/browser/style"
+import { alignItems, backgroundColor, flex, gap, left, overflow, padding, size as sizeStyle, top } from "rokay/browser/style"
 import { MixArgs } from "rokay/mix"
 
 import { Item, ItemFood, ItemLitter, ItemWaterBowl } from "../shared/items/types.gen"
@@ -14,7 +14,7 @@ import { Assets } from "./assets"
 import { ItemCanvas } from "./elts/inventory"
 import { TextCanvas2 } from "./elts/text-canvas"
 import { $store } from "./style/kiki.gen"
-import { $absolute, $flexCol, $flexRow, $relative } from "./style/utils.gen"
+import { $absolute, $flexCol, $flexRow, $relative, $w100 } from "./style/utils.gen"
 import { WorldFM } from "./worlds/form-models.gen"
 
 
@@ -68,7 +68,7 @@ export const
             overflow("auto"),
             padding("8px"),
             top(0),
-            width("100%"),
+            $w100,
             ...args
           ),
           div($absolute, left("4px"), top("4px"), apd(TextCanvas2(label, assets.font9))),

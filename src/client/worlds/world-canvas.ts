@@ -6,8 +6,7 @@ import { Loop } from "rokay/browser/game/loop"
 import { match, matchIf } from "rokay/browser/match"
 import { onClick, onInput, onKeydown, onMousedown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { alignItems, bottom, flex, gap, justifyContent, minWidth, overflow, padding, pointerEvents, position,
-  top, width } from "rokay/browser/style"
+import { alignItems, bottom, flex, gap, justifyContent, minWidth, overflow, padding, pointerEvents, top } from "rokay/browser/style"
 import { remove } from "rokay/data/array"
 import { divide_, floor_, V } from "rokay/math/v"
 import { MixArgs } from "rokay/mix"
@@ -23,7 +22,7 @@ import { CatFM } from "../cats/form-models.gen"
 import { withDrawer } from "../drawer"
 import { matchInventory } from "../elts/inventory"
 import { TextCanvas2 } from "../elts/text-canvas"
-import { $absolute, $flexCol, $flexRow } from "../style/utils.gen"
+import { $absolute, $flexCol, $flexRow, $relative, $w100 } from "../style/utils.gen"
 import { ActiveStateFM, ActiveStateFocusFM, ActiveStateNameFM, WorldFM } from "../worlds/form-models.gen"
 
 
@@ -37,7 +36,7 @@ export const
     state: PropForm<ActiveStateFM>,
     world: WorldFM,
   ) =>
-    div(position("relative"), apd(
+    div($relative, apd(
       canvas($(app.size, ({ size: { x, y } }) => sizeAttr(x, y)), withDrawer(
         app,
         assets,
@@ -210,7 +209,7 @@ const
     pointerEvents("none"),
     $absolute,
     top("0"),
-    width("100%"),
+    $w100,
     ...args
   ),
 
@@ -221,7 +220,7 @@ const
     overflow("auto"),
     padding("4px"),
     pointerEvents("initial"),
-    width("100%"),
+    $w100,
     ...args
   ),
 
@@ -231,6 +230,6 @@ const
     overflow("auto"),
     padding("4px"),
     pointerEvents("initial"),
-    width("100%"),
+    $w100,
     ...args
   )
