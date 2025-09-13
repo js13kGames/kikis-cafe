@@ -5,8 +5,8 @@ import { Loop } from "rokay/browser/game/loop"
 import { LocalStore } from "rokay/browser/local-storage"
 import { match } from "rokay/browser/match"
 import { mount } from "rokay/browser/mount"
+import { onClick } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { BrowserRouter } from "rokay/browser/router"
 import { alignItems, flex, gap, justifyContent, overflow, padding, size, transform, transformOrigin } from "rokay/browser/style"
 import { WindowSize } from "rokay/browser/window"
 import { remove, tab } from "rokay/data/array"
@@ -15,24 +15,21 @@ import { divide, floor_, len, minus, plus_, scale_, unit, unitOfAng, V, WV } fro
 import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
-import { matchOpt } from "rokay/route/router"
+import { Prop } from "rokay/prop/prop"
 
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
 import { CatStateDead, CatStateDrink, CatStateEat, CatStateSit, CatStateStand, CatStateSuspend, CatStateWalk } from "../shared/cats/types.gen.js"
 import { keyToPos, posToKey, TILE_CENTER } from "../shared/items/model.js"
 import { Item } from "../shared/items/types.gen.js"
-import { pgIndex, pgInside, pgStore, pgWork } from "../shared/pages.gen.js"
 import { BLINK_RATE, CAT_RATE, DRINK_RATE, EAT_RATE, MAX_CAT_HUNGER, MAX_CAT_THIRST, SIT_RATE, SUSPEND_RATE,
   UNBLINK_RATE } from "../shared/rates.js"
 import { ActiveStateGlobal, StateInside, StateOutside, StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
 
 import { AppClient } from "./app.js"
 import { load } from "./assets.js"
-import { Base } from "./base.syn.js"
 import { CatFM } from "./cats/form-models.gen.js"
 import { Loader } from "./elts/loader.js"
 import { TextCanvas2 } from "./elts/text-canvas.js"
-import { InsidePage } from "./inside.pag.js"
 import { StorePage } from "./store.pag.js"
 import { $flexCol, $flexRow, $relative, $w100 } from "./style/utils.gen.js"
 import { WorkPage } from "./work.pag.js"
@@ -191,9 +188,9 @@ mount(document.body, () => {
 
     TOP_HEIGHT = 17,
 
-    router = BrowserRouter(),
+    //router = BrowserRouter(),
     app: AppClient = {
-      router,
+      //router,
       size: derive(WindowSize(), (windowSize) => {
         const zoom = windowSize.x < 640 || windowSize.y < 640 ? 3 : 4
         const size = floor_(divide(windowSize, zoom))
@@ -209,17 +206,18 @@ mount(document.body, () => {
     assets = Asink({
       gen: () => load(),
     }),
-    state = router.derive<
-      StateFM
-    >(
-      [
-        matchOpt(/^\/?$/, ([_]) => StateOutsideFM(StateOutside(ActiveStateGlobal()))),
-        matchOpt(/^\/inside\/?$/, () => StateInsideFM(StateInside(ActiveStateGlobal()))),
-        matchOpt(/^\/work\/?$/, () => StateWorkFM(StateWork(0))),
-        matchOpt(/^\/store\/?$/, () => StateStore()),
-      ],
-      () => StateOutsideFM(),
-    ),
+    state = Prop<StateFM>(StateOutsideFM(StateOutside(ActiveStateGlobal()))),
+    // router.derive<
+    //   StateFM
+    // >(
+    //   [
+    //     matchOpt(/^\/?$/, ([_]) => StateOutsideFM(StateOutside(ActiveStateGlobal()))),
+    //     matchOpt(/^\/inside\/?$/, () => StateInsideFM(StateInside(ActiveStateGlobal()))),
+    //     matchOpt(/^\/work\/?$/, () => StateWorkFM(StateWork(0))),
+    //     matchOpt(/^\/store\/?$/, () => StateStore()),
+    //   ],
+    //   () => StateOutsideFM(),
+    // ),
     worldLS = LocalStore("dlb-kiki.world", () => World(
       100,
       tab(10, () => RandomCat(app.size.get().bounds)),
@@ -244,7 +242,7 @@ mount(document.body, () => {
     loop.destroy()
   })
 
-  return Base(app, Loader(assets, (assets) =>
+  return apd(Loader(assets, (assets) =>
     div(
       $flexCol,
       $relative,
@@ -282,7 +280,7 @@ mount(document.body, () => {
 
         match(state, (state) =>
           state.t === "inside" ?
-            InsidePage(app, assets, state, world)
+            WorldCanvas(app, assets, false, world.catsInside, world.itemsInside, state.state, world)
           : state.t === "outside" ?
             WorldCanvas(app, assets, true, world.cats, world.itemsOutside, state.state, world)
           : state.t === "store" ?
@@ -300,10 +298,30 @@ mount(document.body, () => {
           padding("4px"),
           $w100,
           apd(
-            a(app.router.href(pgIndex()), apd(TextCanvas2("Outside", assets.font9))),
-            a(app.router.href(pgInside()), apd(TextCanvas2("Inside", assets.font9))),
-            a(app.router.href(pgWork()), apd(TextCanvas2("Work", assets.font9))),
-            a(app.router.href(pgStore()), apd(TextCanvas2("Store", assets.font9))),
+            a(
+              onClick(() => {
+                state.set(StateOutsideFM(StateOutside(ActiveStateGlobal())))
+              }),
+              apd(TextCanvas2("Outside", assets.font9)),
+            ),
+            a(
+              onClick(() => {
+                state.set(StateInsideFM(StateInside(ActiveStateGlobal())))
+              }),
+              apd(TextCanvas2("Inside", assets.font9)),
+            ),
+            a(
+              onClick(() => {
+                state.set(StateWorkFM(StateWork(0)))
+              }),
+              apd(TextCanvas2("Work", assets.font9)),
+            ),
+            a(
+              onClick(() => {
+                state.set(StateStore())
+              }),
+              apd(TextCanvas2("Store", assets.font9)),
+            ),
           ),
         ),
       ),
