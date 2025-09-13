@@ -157,7 +157,7 @@ mount(document.body, () => {
       ],
       () => StateOutsideFM(),
     ),
-    worldLS = LocalStore("world", () => World(
+    worldLS = LocalStore("dlb-kiki.world", () => World(
       100,
       tab(10, () => RandomCat(app.size.get().bounds)),
       [],
