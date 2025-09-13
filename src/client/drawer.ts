@@ -144,6 +144,10 @@ export const
             // wall
             ctx.fillStyle = "hsl(32, 70%, 76%)"
             ctx.fillRect(0, 0, ctx.canvas.width, SKY_HEIGHT_PX)
+            ctx.fillStyle = "rgba(0,0,0,.25)"
+            for (let x = 0; x < ctx.canvas.width; x += 8) {
+              ctx.fillRect(x, 0, 4, SKY_HEIGHT_PX)
+            }
 
             // baseboard
             ctx.fillStyle = BASE_BOARD_COLOR
@@ -151,10 +155,9 @@ export const
 
             // door
             ctx.save()
-            ctx.fillStyle = BASE_BOARD_COLOR
             ctx.translate(Math.floor(ctx.canvas.width / 2), SKY_HEIGHT_PX)
             const DOOR_SIZE = SKY_HEIGHT_PX * 3 / 4
-            ctx.strokeStyle = BASE_BOARD_COLOR
+            ctx.strokeStyle = "hsl(34,68%,26%)"
             ctx.lineWidth = 2
             ctx.strokeRect(-DOOR_SIZE / 2 - .5, -DOOR_SIZE - .5, DOOR_SIZE + 2, DOOR_SIZE + 2)
             ctx.lineWidth = 1
@@ -171,6 +174,12 @@ export const
             // carpet
             ctx.fillStyle = CARPET_COLOR
             ctx.fillRect(0, SKY_HEIGHT_PX, ctx.canvas.width, ctx.canvas.height - SKY_HEIGHT_PX)
+            ctx.fillStyle = "rgba(0,0,0,.25)"
+            for (let y = SKY_HEIGHT_PX + 1; y < ctx.canvas.height; y += 8) {
+              for (let x = 0; x < ctx.canvas.width; x += 8) {
+                ctx.fillRect(x, y, 6, 6)
+              }
+            }
 
             // seperator
             ctx.fillStyle = "#000"
