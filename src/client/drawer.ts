@@ -3,7 +3,7 @@ import { canvas } from "rokay/browser/elt"
 import { withCtx } from "rokay/browser/game/danvas"
 import { getOrPut } from "rokay/data/map"
 import { pick } from "rokay/math/random"
-import { V, VZ } from "rokay/math/v"
+import { divide, V, VZ } from "rokay/math/v"
 
 import { Item } from "../shared/items/types.gen"
 
@@ -306,8 +306,16 @@ export const
         y.step()
         zoom.step()
         ctx.translate(Math.floor(ctx.canvas.width / 2), Math.floor(ctx.canvas.height / 2))
-        ctx.scale(zoom.get(), zoom.get())
-        ctx.translate(-Math.round(x.get()), -Math.round(y.get()))
+        const z = zoom.get()
+        ctx.scale(z, z)
+        const { bounds } = app.size.get()
+        const size = V(ctx.canvas.width, ctx.canvas.height)
+        const zoomedSize = divide(size, z)
+        const diff = divide(zoomedSize, 2)
+        ctx.translate(
+          -Math.round(Math.max(bounds.min.x + diff.x, Math.min(x.get(), bounds.max.x - diff.x))),
+          -Math.round(Math.min(y.get(), bounds.max.y - diff.y)),
+        )
         cb()
         ctx.restore()
       },
