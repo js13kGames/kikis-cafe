@@ -10,7 +10,7 @@ import { BrowserRouter } from "rokay/browser/router"
 import { alignItems, flex, gap, justifyContent, overflow, padding, size, transform, transformOrigin,
   width } from "rokay/browser/style"
 import { WindowSize } from "rokay/browser/window"
-import { tab } from "rokay/data/array"
+import { remove, tab } from "rokay/data/array"
 import { float, int, pick } from "rokay/math/random"
 import { divide, floor_, len, minus, plus_, scale_, unit, unitOfAng, V, WV } from "rokay/math/v"
 import { mix } from "rokay/mix"
@@ -21,7 +21,7 @@ import { matchOpt } from "rokay/route/router"
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
 import { CatStateDead, CatStateSit, CatStateStand, CatStateSuspend, CatStateWalk } from "../shared/cats/types.gen.js"
 import { pgIndex, pgInside, pgStore, pgWork } from "../shared/pages.gen.js"
-import { CAT_RATE, SIT_RATE, SUSPEND_RATE } from "../shared/rates.js"
+import { BLINK_RATE, CAT_RATE, SIT_RATE, SUSPEND_RATE, UNBLINK_RATE } from "../shared/rates.js"
 import { ActiveStateGlobal, StateInside, StateOutside, StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
 
 import { AppClient } from "./app.js"
@@ -48,7 +48,7 @@ mount(document.body, () => {
 
     spawnCat = () => {
       const cat = CatFM(RandomCat(app.size.get().bounds))
-      cat.state = CatStateWalk(cat.pos)
+      cat.state.set(() => CatStateWalk(cat.pos))
       const { size } = app.size.get()
       cat.pos = V(cat.pos.x < size.x / 2 ? -10 : size.x + 10, cat.pos.y)
       cat.scale.x = cat.pos.x < 0 ? 1 : -1
@@ -69,11 +69,21 @@ mount(document.body, () => {
     },
 
     stepCat = (cat: CatFM, outside: boolean) => {
-      if (cat.state.t === "dead") { return }
+      const _state = cat.state.get()
+      if (_state.t === "dead") { return }
       const { bounds } = app.size.get()
       ++cat.attrs.age
-      if (--cat.attrs.hunger <= 0 || --cat.attrs.thirst <= 0) { cat.state = CatStateDead() }
-      if (cat.state.t === "sit" || cat.state.t === "stand") {
+      if (--cat.attrs.hunger <= 0 || --cat.attrs.thirst <= 0) {
+        if (cat.state.get().t === "suspend") {
+          // only kill it if it's on screen
+          world.cats.set((_cats) => remove(_cats, cat))
+        } else {
+          cat.state.set(() => CatStateDead(cat.attrs.hunger <= 0 ? "Starved" : "Dehydration"))
+        }
+        return
+      }
+      cat.blink = cat.blink ? Math.random() >= UNBLINK_RATE : Math.random() < BLINK_RATE
+      if (_state.t === "sit" || _state.t === "stand") {
         if (Math.random() < SIT_RATE) {
           let to = plus_(scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)), cat.pos)
           if (outside) {
@@ -81,27 +91,25 @@ mount(document.body, () => {
           } else {
             to = bound_(to, bounds)
           }
-          cat.state = CatStateWalk(to)
-          cat.scale.x = cat.state.to.x < cat.pos.x ? -1 : 1
+          cat.state.set(() => CatStateWalk(to))
+          cat.scale.x = to.x < cat.pos.x ? -1 : 1
         }
-      } else if (cat.state.t === "suspend") {
+      } else if (_state.t === "suspend") {
         if (Math.random() < SUSPEND_RATE) {
           const { bounds } = app.size.get()
-          cat.state = CatStateWalk(V(
-            float(bounds.min.x, bounds.max.x),
-            float(bounds.min.y, bounds.max.y),
-          ))
-          cat.scale.x = cat.state.to.x < cat.pos.x ? -1 : 1
+          const to = V(float(bounds.min.x, bounds.max.x), float(bounds.min.y, bounds.max.y))
+          cat.state.set(() => CatStateWalk(to))
+          cat.scale.x = to.x < cat.pos.x ? -1 : 1
         }
-      } else if (cat.state.t === "walk") {
-        const diff = minus(cat.state.to, cat.pos)
+      } else if (_state.t === "walk") {
+        const diff = minus(_state.to, cat.pos)
         if (len(diff) < CAT_SPEED) {
-          cat.pos = cat.state.to
+          cat.pos = _state.to
           if (
             outside
             && (cat.pos.x < bounds.min.x || cat.pos.x > bounds.max.x || cat.pos.y > bounds.max.y)
           ) {
-            cat.state = CatStateSuspend()
+            cat.state.set(() => CatStateSuspend())
             const _state = state.get()
             if (_state.t === "outside") {
               const _innerState = _state.state.get()
@@ -110,7 +118,7 @@ mount(document.body, () => {
               }
             }
           } else {
-            cat.state = pick([CatStateSit(), CatStateStand()])
+            cat.state.set(() => pick([CatStateSit(), CatStateStand()]))
           }
         } else {
           cat.pos = plus_(scale_(unit(diff), CAT_SPEED), cat.pos)

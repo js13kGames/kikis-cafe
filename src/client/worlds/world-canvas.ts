@@ -6,11 +6,12 @@ import { Loop } from "rokay/browser/game/loop"
 import { match, matchIf } from "rokay/browser/match"
 import { onClick, onInput, onKeydown, onMousedown } from "rokay/browser/on"
 import { $ } from "rokay/browser/prop"
-import { bottom, display, flex, flexDirection, gap, justifyContent, minWidth, overflow, padding, pointerEvents,
-  position, top, width } from "rokay/browser/style"
+import { alignItems, bottom, flex, gap, justifyContent, minWidth, overflow, padding, pointerEvents, position,
+  top, width } from "rokay/browser/style"
 import { remove } from "rokay/data/array"
 import { divide_, floor_, scale_, V } from "rokay/math/v"
 import { MixArgs } from "rokay/mix"
+import { derive } from "rokay/prop/derive"
 
 import { ActiveStateGlobal } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
@@ -18,6 +19,7 @@ import { Assets } from "../assets"
 import { withDrawer } from "../drawer"
 import { matchInventory } from "../elts/inventory"
 import { TextCanvas2 } from "../elts/text-canvas"
+import { $absolute, $flexCol, $flexRow } from "../style/utils.gen"
 import { ActiveStateFocusFM, ActiveStateNameFM, StateOutsideFM, WorldFM } from "../worlds/form-models.gen"
 
 
@@ -33,7 +35,7 @@ export const
             drawer.track(() => {
               drawer.bg()
               world.cats.get().forEach((cat) => {
-                if (cat.state.t !== "suspend") { drawer.cat(cat) }
+                if (cat.state.get().t !== "suspend") { drawer.cat(cat) }
               })
               Object.entries(world.itemsOutside.get()).forEach(([posString, item]) => {
                 const match = posString.match(/^(-?\d+),(-?\d+)$/)
@@ -100,38 +102,63 @@ export const
           ))
         : _state.t === "focus" ?
           InnerHUD(apd(
-            UpperHUD(apd(match(_state.cat.name, (_name) =>
-              TextCanvas2(
+            UpperHUD(apd(
+              match(_state.cat.name, (_name) => TextCanvas2(
                 _name.trim() || "Unnamed Cat",
                 _name.trim() ? assets.font16 : assets.font16italic,
-              )
-            ))),
+              )),
+              matchIf(derive(_state.cat.state, (_state) => _state.t === "dead"), (_state) =>
+                TextCanvas2("(Deceased)", assets.font12)
+              ),
+            )),
             LowerControls(apd(
               button(apd(TextCanvas2("Back", assets.font12)), onClick(() => {
                 state.state.set(() => ActiveStateGlobal())
               })),
-              button(apd(TextCanvas2("Catch", assets.font12)), onClick(() => {
-                world.cats.set((_cats) => _cats.filter((c) => c !== _state.cat))
-                world.catsInside.set((_cats) => _cats.concat(_state.cat))
-                state.state.set(() => ActiveStateGlobal())
-              })),
-              button(apd(TextCanvas2("Name", assets.font12)), onClick(() => {
-                state.state.set(() => {
-                  const newState = ActiveStateNameFM()
-                  newState.cat = _state.cat
-                  return newState
-                })
-              })),
+              match(_state.cat.state, (_catState) =>
+                _catState.t !== "dead" ?
+                  button(apd(TextCanvas2("Catch", assets.font12)), onClick(() => {
+                    world.cats.set((_cats) => remove(_cats, _state.cat))
+                    world.catsInside.set((_cats) => _cats.concat(_state.cat))
+                    state.state.set(() => ActiveStateGlobal())
+                  }))
+                :
+                  undefined
+              ),
+              match(_state.cat.state, (_catState) =>
+                _catState.t !== "dead" ?
+                  button(apd(TextCanvas2("Name", assets.font12)), onClick(() => {
+                    state.state.set(() => {
+                      const newState = ActiveStateNameFM()
+                      newState.cat = _state.cat
+                      return newState
+                    })
+                  }))
+                :
+                  undefined
+              ),
+              match(_state.cat.state, (_catState) =>
+                _catState.t === "dead" ?
+                  button(apd(TextCanvas2("Clean", assets.font12)), onClick(() => {
+                    world.cats.set((_cats) => remove(_cats, _state.cat))
+                    state.state.set(() => ActiveStateGlobal())
+                  }))
+                :
+                  undefined
+              ),
             )),
           ))
         : _state.t === "name" ?
           InnerHUD(apd(
-            UpperHUD(apd(match(_state.cat.name, (_name) =>
-              TextCanvas2(
+            UpperHUD(apd(
+              match(_state.cat.name, (_name) => TextCanvas2(
                 _name.trim() || "Unnamed Cat",
                 _name.trim() ? assets.font16 : assets.font16italic,
-              )
-            ))),
+              )),
+              matchIf(derive(_state.cat.state, (_state) => _state.t === "dead"), (_state) =>
+                TextCanvas2("(Deceased)", assets.font12)
+              ),
+            )),
             LowerControls(apd(
               button(apd(TextCanvas2("Back", assets.font12)), onClick(() => {
                 state.state.set(() => ActiveStateGlobal())
@@ -166,21 +193,28 @@ export const
 const
   InnerHUD = (...args: MixArgs<HTMLDivElement>) => div(
     bottom("0"),
-    display("flex"),
-    flexDirection("column"),
+    $flexCol,
     justifyContent("space-between"),
     pointerEvents("none"),
-    position("absolute"),
+    $absolute,
     top("0"),
     width("100%"),
     ...args
   ),
 
-  UpperHUD = (...args: MixArgs<HTMLDivElement>) =>
-    LowerControls(...args),
+  UpperHUD = (...args: MixArgs<HTMLDivElement>) => div(
+    alignItems("start"),
+    $flexCol,
+    gap("4px"),
+    overflow("auto"),
+    padding("4px"),
+    pointerEvents("initial"),
+    width("100%"),
+    ...args
+  ),
 
   LowerControls = (...args: MixArgs<HTMLDivElement>) => div(
-    display("flex"),
+    $flexRow,
     gap("4px"),
     overflow("auto"),
     padding("4px"),

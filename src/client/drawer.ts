@@ -239,13 +239,14 @@ export const
         ctx.scale(cat.scale.x, cat.scale.y)
         // ctx.fillStyle = "rgba(0,0,0,.5)"
         // ctx.fillRect(-5, -2, 10, 4)
-        const frame = cat.state.t === "dead" ?
-            3
-          : cat.state.t === "sit" ?
-            1
+        const _state = cat.state.get()
+        const frame = _state.t === "dead" ?
+            V(2, 1)
+          : _state.t === "sit" ?
+            V(1, cat.blink ? 1 : 0)
           :
-            0
-        ctx.drawImage(canvas, frame * 16, 0, 16, 16, -8, -13, 16, 16)
+            V(0, cat.blink ? 1 : 0)
+        ctx.drawImage(canvas, frame.x * 16, frame.y * 16, 16, 16, -8, -13, 16, 16)
         ctx.restore()
       },
 
