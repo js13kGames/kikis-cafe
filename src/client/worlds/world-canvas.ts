@@ -9,11 +9,12 @@ import { $ } from "rokay/browser/prop"
 import { alignItems, bottom, flex, gap, justifyContent, minWidth, overflow, padding, pointerEvents, position,
   top, width } from "rokay/browser/style"
 import { remove } from "rokay/data/array"
-import { divide_, floor_, scale_, V } from "rokay/math/v"
+import { divide_, floor_, V } from "rokay/math/v"
 import { MixArgs } from "rokay/mix"
 import { derive } from "rokay/prop/derive"
 import { PropForm } from "rokay/prop/form"
 
+import { keyToPos } from "../../shared/items/model"
 import { Item } from "../../shared/items/types.gen"
 import { ActiveStateGlobal } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
@@ -52,9 +53,7 @@ export const
                 drawer.cat(cat)
               })
               Object.entries(items.get()).forEach(([posString, item]) => {
-                const match = posString.match(/^(-?\d+),(-?\d+)$/)
-                if (match == null) { return }
-                drawer.item(item, scale_(V(parseInt(match[1], 10), parseInt(match[2], 10)), 16))
+                drawer.item(item, keyToPos(posString))
               })
             })
           })

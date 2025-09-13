@@ -20,9 +20,12 @@ import { matchOpt } from "rokay/route/router"
 import { WorldCanvas } from "worlds/world-canvas.js"
 
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
-import { CatStateDead, CatStateSit, CatStateStand, CatStateSuspend, CatStateWalk } from "../shared/cats/types.gen.js"
+import { CatStateDead, CatStateDrink, CatStateEat, CatStateSit, CatStateStand, CatStateSuspend, CatStateWalk } from "../shared/cats/types.gen.js"
+import { keyToPos, posToKey, TILE_CENTER } from "../shared/items/model.js"
+import { Item } from "../shared/items/types.gen.js"
 import { pgIndex, pgInside, pgStore, pgWork } from "../shared/pages.gen.js"
-import { BLINK_RATE, CAT_RATE, SIT_RATE, SUSPEND_RATE, UNBLINK_RATE } from "../shared/rates.js"
+import { BLINK_RATE, CAT_RATE, DRINK_RATE, EAT_RATE, MAX_CAT_HUNGER, MAX_CAT_THIRST, SIT_RATE, SUSPEND_RATE,
+  UNBLINK_RATE } from "../shared/rates.js"
 import { ActiveStateGlobal, StateInside, StateOutside, StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
 
 import { AppClient } from "./app.js"
@@ -46,6 +49,21 @@ mount(document.body, () => {
       return v
     },
 
+    randomWalk = (cat: CatFM, outside: boolean, bounds: { min: V, max: V }) => {
+      let to = plus_(scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)), cat.pos)
+      if (outside) {
+        to.y = Math.max(bounds.min.y, to.y)
+      } else {
+        to = bound_(to, bounds)
+      }
+      walk(cat, to)
+    },
+
+    walk = (cat: CatFM, to: V) => {
+      cat.state.set(() => CatStateWalk(to))
+      cat.scale.x = to.x < cat.pos.x ? -1 : 1
+    },
+
     spawnCat = () => {
       const cat = CatFM(RandomCat(app.size.get().bounds))
       cat.state.set(() => CatStateWalk(cat.pos))
@@ -58,8 +76,8 @@ mount(document.body, () => {
     step = (dt = 1) => {
       for (let i = 0; i < dt; ++i) {
         if (Math.random() < CAT_RATE) { world.cats.set((_cats) => _cats.concat(spawnCat())) }
-        world.cats.get().forEach((cat) => stepCat(cat, true))
-        world.catsInside.get().forEach((cat) => stepCat(cat, false))
+        world.cats.get().forEach((cat) => stepCat(cat, true, world.itemsOutside.get()))
+        world.catsInside.get().forEach((cat) => stepCat(cat, false, world.itemsInside.get()))
       }
       world.time.set((_time) => {
         const next = new Date(_time)
@@ -68,10 +86,10 @@ mount(document.body, () => {
       })
     },
 
-    stepCat = (cat: CatFM, outside: boolean) => {
+    stepCat = (cat: CatFM, outside: boolean, items: Record<string, Item>) => {
       const _state = cat.state.get()
       if (_state.t === "dead") { return }
-      const { bounds } = app.size.get()
+      const { bounds, size } = app.size.get()
       ++cat.attrs.age
       if (--cat.attrs.hunger <= 0 || --cat.attrs.thirst <= 0) {
         if (cat.state.get().t === "suspend") {
@@ -83,16 +101,58 @@ mount(document.body, () => {
         return
       }
       cat.blink = cat.blink ? Math.random() >= UNBLINK_RATE : Math.random() < BLINK_RATE
+      if (_state.t === "drink") {
+        const currentItem = items[posToKey(cat.pos)]
+        if (cat.attrs.thirst < MAX_CAT_THIRST && currentItem.t === "waterBowl") {
+          cat.attrs.thirst += DRINK_RATE
+          if (cat.attrs.thirst > MAX_CAT_THIRST) { randomWalk(cat, outside, bounds) }
+        }
+      } else if (_state.t === "eat") {
+        const currentItem = items[posToKey(cat.pos)]
+        if (cat.attrs.hunger < MAX_CAT_HUNGER && currentItem.t === "food") {
+          cat.attrs.hunger += EAT_RATE
+          if (cat.attrs.hunger > MAX_CAT_HUNGER) { randomWalk(cat, outside, bounds) }
+        }
+      }
       if (_state.t === "sit" || _state.t === "stand") {
         if (Math.random() < SIT_RATE) {
-          let to = plus_(scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)), cat.pos)
-          if (outside) {
-            to.y = Math.max(bounds.min.y, to.y)
+          if (Math.random() > cat.attrs.hunger / MAX_CAT_HUNGER) {
+            const currentItem = items[posToKey(cat.pos)]
+            if (currentItem?.t === "food") {
+              cat.state.set(() => CatStateEat())
+            } else {
+              const entry = Object.entries(items).find(([_pos, item]) => item.t === "food")
+              walk(
+                cat,
+                entry == null ?
+                  cat.pos.x > size.x / 2 ? V(size.x + 10, cat.pos.y) : V(-10, cat.pos.y)
+                :
+                  plus_(keyToPos(entry[0]), TILE_CENTER),
+              )
+            }
+          } else if (Math.random() > cat.attrs.thirst / MAX_CAT_THIRST) {
+            const currentItem = items[posToKey(cat.pos)]
+            if (currentItem?.t === "waterBowl") {
+              cat.state.set(() => CatStateDrink())
+            } else {
+              const entry = Object.entries(items).find(([_pos, item]) => item.t === "waterBowl")
+              walk(
+                cat,
+                entry == null ?
+                  cat.pos.x > size.x / 2 ? V(size.x + 10, cat.pos.y) : V(-10, cat.pos.y)
+                :
+                  plus_(keyToPos(entry[0]), TILE_CENTER),
+              )
+            }
           } else {
-            to = bound_(to, bounds)
+            let to = plus_(scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)), cat.pos)
+            if (outside) {
+              to.y = Math.max(bounds.min.y, to.y)
+            } else {
+              to = bound_(to, bounds)
+            }
+            walk(cat, to)
           }
-          cat.state.set(() => CatStateWalk(to))
-          cat.scale.x = to.x < cat.pos.x ? -1 : 1
         }
       } else if (_state.t === "suspend") {
         if (Math.random() < SUSPEND_RATE) {
@@ -173,6 +233,9 @@ mount(document.body, () => {
       worldLS.set(toWorld(world))
     })
       .start()
+
+  world.cats.set((_cats) => _cats.filter((cat) => cat.state.get().t !== "dead"))
+  world.catsInside.set((_cats) => _cats.filter((cat) => cat.state.get().t !== "dead"))
 
   onDestroy(() => {
     loop.destroy()

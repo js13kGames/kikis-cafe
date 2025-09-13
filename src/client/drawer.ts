@@ -250,10 +250,16 @@ export const
         ctx.scale(cat.scale.x, cat.scale.y)
         const frame = _state.t === "dead" ?
             V(2, 1)
-          : _state.t === "sit" ?
-            V(1, cat.blink ? 1 : 0)
           :
-            V(0, cat.blink ? 1 : 0)
+            V(
+              _state.t === "eat" || _state.t === "drink" ?
+                3
+              : _state.t === "sit" ?
+                1
+              :
+                0,
+              cat.blink ? 1 : 0,
+            )
         ctx.drawImage(canvas, frame.x * 16, frame.y * 16, 16, 16, -8, -13, 16, 16)
         ctx.restore()
       },

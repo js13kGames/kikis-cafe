@@ -6,6 +6,8 @@ import { V } from "../v/types"
 export const
   CatState = TypeADT({
     dead: { reason: TypeString() },
+    drink: {},
+    eat: {},
     sit: {},
     suspend: {},
     stand: {},
