@@ -1,23 +1,25 @@
-import { TypeADT, TypeObject, TypeProp, TypeString } from "rokay/route/type"
+import { TypeADT, TypeInt, TypeObject, TypeProp, TypeString } from "rokay/route/type"
 
 import { V } from "../v/types"
 
 
 export const
   CatState = TypeADT({
-    bread: {},
-    halloween: {},
-    lick: {},
-    play: {},
+    dead: {},
     sit: {},
-    splay: {},
     suspend: {},
     stand: {},
-    stretch: {},
     walk: { to: V },
   }),
 
+  Cattrs = TypeObject({
+    age: TypeInt(),
+    hunger: TypeInt(),
+    thirst: TypeInt(),
+  }),
+
   Cat = TypeObject({
+    attrs: Cattrs,
     coat: TypeString(),
     eyes: TypeString(),
     name: TypeProp(TypeString(), { editable: true }),

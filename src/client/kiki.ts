@@ -19,8 +19,9 @@ import { derive } from "rokay/prop/derive"
 import { matchOpt } from "rokay/route/router"
 
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
-import { CatStateSit, CatStateStand, CatStateSuspend, CatStateWalk } from "../shared/cats/types.gen.js"
+import { CatStateDead, CatStateSit, CatStateStand, CatStateSuspend, CatStateWalk } from "../shared/cats/types.gen.js"
 import { pgIndex, pgInside, pgStore, pgWork } from "../shared/pages.gen.js"
+import { CAT_RATE, SIT_RATE, SUSPEND_RATE } from "../shared/rates.js"
 import { ActiveStateGlobal, StateInside, StateOutside, StateStore, StateWork, World } from "../shared/worlds/types.gen.js"
 
 import { AppClient } from "./app.js"
@@ -30,7 +31,6 @@ import { CatFM } from "./cats/form-models.gen.js"
 import { Loader } from "./elts/loader.js"
 import { TextCanvas2 } from "./elts/text-canvas.js"
 import { InsidePage } from "./inside.pag.js"
-import { CAT_RATE, SIT_RATE, SUSPEND_RATE } from "./rates.js"
 import { StorePage } from "./store.pag.js"
 import { $flexCol, $flexRow, $relative } from "./style/utils.gen.js"
 import { WorkPage } from "./work.pag.js"
@@ -69,7 +69,10 @@ mount(document.body, () => {
     },
 
     stepCat = (cat: CatFM, outside: boolean) => {
+      if (cat.state.t === "dead") { return }
       const { bounds } = app.size.get()
+      ++cat.attrs.age
+      if (--cat.attrs.hunger <= 0 || --cat.attrs.thirst <= 0) { cat.state = CatStateDead() }
       if (cat.state.t === "sit" || cat.state.t === "stand") {
         if (Math.random() < SIT_RATE) {
           let to = plus_(scale_(unitOfAng(Math.random() * 2 * Math.PI), int(50, 100)), cat.pos)

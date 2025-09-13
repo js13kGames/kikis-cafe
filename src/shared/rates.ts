@@ -1,7 +1,15 @@
 export const
+  FPS = 60,
+
+  ticksInDays = (days: number) =>
+    days * 24 * 60 * FPS,
+
+  ticksInYears = (years: number) =>
+    Math.round(ticksInDays(years * 365)),
+
   PER_SECOND_RATE = (sec: number) =>
     1 / sec / FPS,
-  FPS = 60,
+
   SECONDS_PER_CAT = 20,
   CAT_RATE = PER_SECOND_RATE(20),
   SIT_RATE = PER_SECOND_RATE(10),

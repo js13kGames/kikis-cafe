@@ -1,7 +1,9 @@
-import { int, pick } from "rokay/math/random"
+import { float, int, pick } from "rokay/math/random"
 import { V } from "rokay/math/v"
 
-import { Cat, CatStateStand } from "./types.gen"
+import { ticksInDays, ticksInYears } from "../rates"
+
+import { Cat, CatStateStand, Cattrs } from "./types.gen"
 
 
 export const
@@ -14,5 +16,13 @@ export const
 
   RandomCat = ({ min, max }: { min: V, max: V }) => {
     const pos = V(int(min.x, max.x), int(min.y, max.y))
-    return Cat(pick(CAT_COATS), pick(CAT_EYES), "", pos, V(pick([-1, 1]), 1), CatStateStand())
+    return Cat(
+      Cattrs(ticksInYears(float(1, 15)), ticksInDays(float(1, 28)), ticksInDays(float(1, 3))),
+      pick(CAT_COATS),
+      pick(CAT_EYES),
+      "",
+      pos,
+      V(pick([-1, 1]), 1),
+      CatStateStand(),
+    )
   }
