@@ -18,6 +18,7 @@ export const
     const pos = V(int(min.x, max.x), int(min.y, max.y))
     return Cat(
       Cattrs(ticksInYears(float(1, 15)), ticksInDays(float(1, 28)), ticksInDays(float(1, 3))),
+      false,
       pick(CAT_COATS),
       pick(CAT_EYES),
       "",
