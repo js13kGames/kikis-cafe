@@ -233,13 +233,12 @@ export const
       },
 
       cat(cat) {
+        const _state = cat.state.get()
+        if (_state.t === "suspend") { return }
         const canvas = getOrPut(assets.cached.cats, cat, () => CatCanvas(cat, assets.cat))
         ctx.save()
         ctx.translate(cat.pos.x, cat.pos.y)
         ctx.scale(cat.scale.x, cat.scale.y)
-        // ctx.fillStyle = "rgba(0,0,0,.5)"
-        // ctx.fillRect(-5, -2, 10, 4)
-        const _state = cat.state.get()
         const frame = _state.t === "dead" ?
             V(2, 1)
           : _state.t === "sit" ?

@@ -12,32 +12,46 @@ import { remove } from "rokay/data/array"
 import { divide_, floor_, scale_, V } from "rokay/math/v"
 import { MixArgs } from "rokay/mix"
 import { derive } from "rokay/prop/derive"
+import { PropForm } from "rokay/prop/form"
 
+import { Item } from "../../shared/items/types.gen"
 import { ActiveStateGlobal } from "../../shared/worlds/types.gen"
 import { AppClient } from "../app"
 import { Assets } from "../assets"
+import { CatFM } from "../cats/form-models.gen"
 import { withDrawer } from "../drawer"
 import { matchInventory } from "../elts/inventory"
 import { TextCanvas2 } from "../elts/text-canvas"
 import { $absolute, $flexCol, $flexRow } from "../style/utils.gen"
-import { ActiveStateFocusFM, ActiveStateNameFM, StateOutsideFM, WorldFM } from "../worlds/form-models.gen"
+import { ActiveStateFM, ActiveStateFocusFM, ActiveStateNameFM, WorldFM } from "../worlds/form-models.gen"
 
 
 export const
-  WorldCanvas = (app: AppClient, assets: Assets, state: StateOutsideFM, world: WorldFM) => div(
-    position("relative"),
-    apd(
+  WorldCanvas = (
+    app: AppClient,
+    assets: Assets,
+    canCatch: boolean,
+    cats: PropForm<CatFM[]>,
+    items: PropForm<Record<string, Item>>,
+    state: PropForm<ActiveStateFM>,
+    world: WorldFM,
+  ) =>
+    div(position("relative"), apd(
       canvas($(app.size, ({ size: { x, y } }) => sizeAttr(x, y)), withDrawer(
         app,
         assets,
         (drawer) => {
           const loop = Loop(() => {
             drawer.track(() => {
-              drawer.bg()
-              world.cats.get().forEach((cat) => {
-                if (cat.state.get().t !== "suspend") { drawer.cat(cat) }
+              if (canCatch) {
+                drawer.bg()
+              } else {
+                drawer.bgInside()
+              }
+              cats.get().forEach((cat) => {
+                drawer.cat(cat)
               })
-              Object.entries(world.itemsOutside.get()).forEach(([posString, item]) => {
+              Object.entries(items.get()).forEach(([posString, item]) => {
                 const match = posString.match(/^(-?\d+),(-?\d+)$/)
                 if (match == null) { return }
                 drawer.item(item, scale_(V(parseInt(match[1], 10), parseInt(match[2], 10)), 16))
@@ -50,12 +64,12 @@ export const
             loop.destroy()
           })
 
-          state.state.listen((state) => {
+          state.listen((state) => {
             drawer.focus(state.t === "focus" || state.t === "name" ? state.cat : undefined)
           })
 
           onDestroy(onMousedown<HTMLCanvasElement>((el, _ev) => {
-            const _state = state.state.get()
+            const _state = state.get()
             if (_state.t === "global") {
               const rect = el.getBoundingClientRect()
               const pos = floor_(divide_(
@@ -63,14 +77,14 @@ export const
                 app.size.get().zoom,
               ))
 
-              const cat = world.cats.get().find((cat) =>
+              const cat = cats.get().find((cat) =>
                 cat.pos.x - 6 < pos.x
                 && pos.x < cat.pos.x + 6
                 && cat.pos.y - 12 < pos.y
                 && pos.y < cat.pos.y + 2
               )
               if (cat != null) {
-                state.state.set(() => {
+                state.set(() => {
                   const state = ActiveStateFocusFM()
                   state.cat = cat
                   return state
@@ -82,23 +96,21 @@ export const
                 V(_ev.clientX - rect.x, _ev.clientY - rect.y),
                 app.size.get().zoom * 16,
               ))
-              const item = world.itemsOutside.get()[`${pos.x},${pos.y}`]
+              const item = items.get()[`${pos.x},${pos.y}`]
               if (item != null) { return }
-              world.itemsOutside.set(
-                (_items) => ({ ..._items, [`${pos.x},${pos.y}`]: _state.item }),
-              )
+              items.set((_items) => ({ ..._items, [`${pos.x},${pos.y}`]: _state.item }))
               world.inventory.set((_items) => remove(_items, _state.item))
-              state.state.set(() => ActiveStateGlobal())
+              state.set(() => ActiveStateGlobal())
             }
           })(drawer.ctx.canvas))
         },
       )),
 
-      matchIf(state.state, (_state) =>
+      matchIf(state, (_state) =>
         _state.t === "global" ?
           InnerHUD(apd(
             UpperHUD(),
-            LowerControls(apd(matchInventory(assets, state.state, world.inventory))),
+            LowerControls(apd(matchInventory(assets, state, world.inventory))),
           ))
         : _state.t === "focus" ?
           InnerHUD(apd(
@@ -113,14 +125,14 @@ export const
             )),
             LowerControls(apd(
               button(apd(TextCanvas2("Back", assets.font12)), onClick(() => {
-                state.state.set(() => ActiveStateGlobal())
+                state.set(() => ActiveStateGlobal())
               })),
               match(_state.cat.state, (_catState) =>
-                _catState.t !== "dead" ?
+                _catState.t !== "dead" && canCatch ?
                   button(apd(TextCanvas2("Catch", assets.font12)), onClick(() => {
                     world.cats.set((_cats) => remove(_cats, _state.cat))
                     world.catsInside.set((_cats) => _cats.concat(_state.cat))
-                    state.state.set(() => ActiveStateGlobal())
+                    state.set(() => ActiveStateGlobal())
                   }))
                 :
                   undefined
@@ -128,7 +140,7 @@ export const
               match(_state.cat.state, (_catState) =>
                 _catState.t !== "dead" ?
                   button(apd(TextCanvas2("Name", assets.font12)), onClick(() => {
-                    state.state.set(() => {
+                    state.set(() => {
                       const newState = ActiveStateNameFM()
                       newState.cat = _state.cat
                       return newState
@@ -140,8 +152,8 @@ export const
               match(_state.cat.state, (_catState) =>
                 _catState.t === "dead" ?
                   button(apd(TextCanvas2("Clean", assets.font12)), onClick(() => {
-                    world.cats.set((_cats) => remove(_cats, _state.cat))
-                    state.state.set(() => ActiveStateGlobal())
+                    cats.set((_cats) => remove(_cats, _state.cat))
+                    state.set(() => ActiveStateGlobal())
                   }))
                 :
                   undefined
@@ -161,7 +173,7 @@ export const
             )),
             LowerControls(apd(
               button(apd(TextCanvas2("Back", assets.font12)), onClick(() => {
-                state.state.set(() => ActiveStateGlobal())
+                state.set(() => ActiveStateGlobal())
               })),
               input(
                 "text",
@@ -173,7 +185,7 @@ export const
                 }),
                 onKeydown((_el, ev) => {
                   if (ev.key === "Enter") {
-                    state.state.set(() => {
+                    state.set(() => {
                       const state = ActiveStateFocusFM()
                       state.cat = _state.cat
                       return state
@@ -186,8 +198,7 @@ export const
         :
           undefined
       ),
-    ),
-  )
+    ))
 
 
 const

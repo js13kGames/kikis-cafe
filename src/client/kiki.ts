@@ -17,6 +17,7 @@ import { mix } from "rokay/mix"
 import { Asink } from "rokay/prop/async"
 import { derive } from "rokay/prop/derive"
 import { matchOpt } from "rokay/route/router"
+import { WorldCanvas } from "worlds/world-canvas.js"
 
 import { CAT_SPEED, RandomCat } from "../shared/cats/model.js"
 import { CatStateDead, CatStateSit, CatStateStand, CatStateSuspend, CatStateWalk } from "../shared/cats/types.gen.js"
@@ -35,7 +36,6 @@ import { StorePage } from "./store.pag.js"
 import { $flexCol, $flexRow, $relative } from "./style/utils.gen.js"
 import { WorkPage } from "./work.pag.js"
 import { StateFM, StateInsideFM, StateOutsideFM, toWorld, WorldFM } from "./worlds/form-models.gen.js"
-import { WorldCanvas } from "./worlds/world-canvas.js"
 
 
 mount(document.body, () => {
@@ -218,7 +218,7 @@ mount(document.body, () => {
           state.t === "inside" ?
             InsidePage(app, assets, state, world)
           : state.t === "outside" ?
-            WorldCanvas(app, assets, state, world)
+            WorldCanvas(app, assets, true, world.cats, world.itemsOutside, state.state, world)
           : state.t === "store" ?
             StorePage(app, assets, world)
           :

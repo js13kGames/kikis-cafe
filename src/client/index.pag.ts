@@ -5,6 +5,5 @@ import { WorldCanvas } from "./worlds/world-canvas"
 
 
 export const
-  IndexPage = (appClient: AppClient, assets: Assets, state: StateOutsideFM, world: WorldFM) => {
-    return WorldCanvas(appClient, assets, state, world)
-  }
+  IndexPage = (appClient: AppClient, assets: Assets, state: StateOutsideFM, world: WorldFM) =>
+    WorldCanvas(appClient, assets, true, world.cats, world.itemsOutside, state.state, world)
