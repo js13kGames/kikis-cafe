@@ -48,11 +48,11 @@ export const
               } else {
                 drawer.bgInside()
               }
-              cats.get().forEach((cat) => {
-                drawer.cat(cat)
-              })
               Object.entries(items.get()).forEach(([posString, item]) => {
                 drawer.item(item, keyToPos(posString))
+              })
+              cats.get().sort((a, b) => a.pos.y - b.pos.y).forEach((cat) => {
+                drawer.cat(cat)
               })
             })
           })
